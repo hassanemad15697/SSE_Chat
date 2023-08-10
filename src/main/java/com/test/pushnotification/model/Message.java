@@ -10,5 +10,6 @@ public class Message {
 
     private Events eventType;
     private String from;
-    private String message;
+    private String to;
+    private Object message;
 }

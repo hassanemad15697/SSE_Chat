@@ -3,61 +3,60 @@ package com.test.pushnotification.publisher;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.test.pushnotification.listeners.EventListener;
+import com.test.pushnotification.model.Group;
 import com.test.pushnotification.model.Message;
+import com.test.pushnotification.model.User;
+import lombok.Getter;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-
+@Getter
 public class EventManager {
     //every event has a list of listeners
-    Map<Events, List<EventListener>> listeners = new ConcurrentHashMap<>();
+    Map<String, EventListener> listeners = new ConcurrentHashMap<>();
 
-    public EventManager(Events... events) {
-        //add the events
-        for (Events operation : events) {
-            this.listeners.put(operation, new ArrayList<>());
-        }
+    public EventManager() {
+        Group generalGroup = new Group("General Group");
+        listeners.put(generalGroup.getGroupName(),generalGroup);
     }
+//
+//    //make the user observe a particular event
+//    public void subscribe(Events eventType, EventListener listener) {
+//        //add the new listener to this list
+//        if (listener instanceof User) {
+//            User user = (User) listener;
+//            listeners.get(eventType).put(user.getUsername(), listener);
+//        }
+//    }
+//
+//    public void unsubscribe(Events eventType, EventListener listener) {
+//        if (listener instanceof User) {
+//            User user = (User) listener;
+//            listeners.get(eventType).remove(user.getUsername());
+//        }
+//    }
+//
+//    public void unsubscribeFromAllEvents(EventListener listener) {
+//        if (listener instanceof User) {
+//            User user = (User) listener;
+//            for (Map<String, EventListener> innerMap : listeners.values()) {
+//                innerMap.remove(user.getUsername());
+//            }
+//        }
+//    }
 
-    //make the user observe a particular event
-    public void subscribe(Events eventType, EventListener listener) {
-        //add the new listener to this list
-        listeners.get(eventType).add(listener);
-
-    }
-
-    public void unsubscribe(Events eventType, EventListener listener) {
-        //add the new listener to this list
-        listeners.get(eventType).remove(listener);
-
-    }
-
-    public void unsubscribeFromAllEvents(EventListener listener) {
-        //remove
-        listeners.entrySet().stream().forEach(eventsListEntry -> {
-            eventsListEntry.getValue().remove(listener);
-        });
-    }
-
-    public void notify(Message eventMessage) {
-        //push the event message to all the listeners
+    public void notify(Message eventMessage)  {
+        EventListener listener = listeners.get(eventMessage.getTo());
         try {
-            listeners.get(eventMessage.getEventType()).stream().forEach(eventListener -> {
-                try {
-                    eventListener.update(eventMessage);
-                } catch (JsonProcessingException e) {
-                    System.out.println(eventMessage.getFrom() + " has an issue");
-//                throw new RuntimeException(e);
-                }
-            });
-        } catch (Exception e) {
-            System.out.println(eventMessage.getFrom() + " has an issue");
-//                throw new RuntimeException(e);
+            listener.update(eventMessage);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
         }
     }
 
-
+    public void addNewUser(User user) {
+        this.listeners.put(user.getUsername(),user);
+        ((Group)this.listeners.get("General Group")).addMember(user);
+    }
 }
 

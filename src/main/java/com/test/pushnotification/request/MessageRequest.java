@@ -5,8 +5,9 @@ import lombok.Data;
 
 @Data
 @Builder
-public class EventMessageRequest {
+public class MessageRequest {
     private String from;
-    private String message;
+    private String to;
+    private Object message;
 }
 

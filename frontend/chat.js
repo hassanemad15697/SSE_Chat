@@ -13,6 +13,7 @@ document.getElementById('messageForm').addEventListener('submit', function(e) {
         },
         body: JSON.stringify({
             from: username,
+			to: 'General Group'
             message: message,
         }),
     });

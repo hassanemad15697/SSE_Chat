@@ -1,33 +1,38 @@
 package com.test.pushnotification.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.test.pushnotification.Notifications.Notification;
+import com.test.pushnotification.model.Group;
 import com.test.pushnotification.model.User;
 import com.test.pushnotification.publisher.Events;
-import com.test.pushnotification.request.EventMessageRequest;
+import com.test.pushnotification.request.MessageRequest;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Service
 public class UserService {
 
 
     static Notification notification = new Notification();
-    static List<User> users = new ArrayList<>();
+    static Map<String,User> users = new ConcurrentHashMap<>();
 
-    public Boolean addUser(User user) {
+    static ObjectMapper objectMapper = new ObjectMapper();
+    public Boolean addUser(User user) throws JsonProcessingException {
         //check if the user not exists in the list
-        if (users.stream().filter(u -> u.getUsername().equals(user.getUsername())).collect(Collectors.toList()).size() == 0) {
+        if (!users.containsKey(user.getUsername())) {
             //add the user to the list
-            users.add(user);
-            notification.events.subscribe(Events.newMessage,user);
+            users.put(user.getUsername(),user);
+            notification.getEventsManager().addNewUser(user);
+            this.subscribe(user.getUsername(), Set.of(Events.usersList,Events.newMessage,Events.userCreate,Events.userDelete));
 
-            notification.newUserNotification(EventMessageRequest.builder().from(user.getUsername()).message("created").build());
-            notification.newMessageNotification(EventMessageRequest.builder().from(user.getUsername()).message("Welcome "+user.getUsername()).build());
+
+
+            notification.serverNotification(MessageRequest.builder().message(objectMapper.writeValueAsString(users.keySet())).build(),user);
+            notification.newUserNotification(MessageRequest.builder().from(user.getUsername()).to("General Group").message(user.getUsername()+" joined").build());
+
             user.getSseEmitter().onCompletion(() -> {
                 this.disconnected(user);
             });
@@ -42,10 +47,10 @@ public class UserService {
         return false;
     }
 
-    public String newMessage(EventMessageRequest request) {
+    public String newMessage(MessageRequest request) {
         Optional<User> currentUser = getCurrentUser(request.getFrom());
         if (currentUser.isPresent()) {
-            notification.newMessageNotification(EventMessageRequest.builder().from(request.getFrom()).message(request.getMessage()).build());
+            notification.newMessageNotification(MessageRequest.builder().from(request.getFrom()).message(request.getMessage()).build());
             return "Sent";
         }
         return "user: "+request.getFrom()+" not exists";
@@ -66,9 +71,10 @@ public class UserService {
     public String subscribe(String username, Set<Events> events) {
         Optional<User> currentUser = getCurrentUser(username);
         if (currentUser.isPresent()) {
-            events.stream().forEach(e -> {
-                notification.events.subscribe(e,currentUser.get());
-            });
+            currentUser.get().setSubscribedEvents(events);
+//            events.stream().forEach(e -> {
+//                notification.events.subscribe(e,currentUser.get());
+//            });
             return "subscribed";
         }
         return "user: "+username+" not exists";
@@ -77,9 +83,10 @@ public class UserService {
     public String unsubscribe(String username, Set<Events> events) {
         Optional<User> currentUser = getCurrentUser(username);
         if (currentUser.isPresent()) {
-            events.stream().forEach(e -> {
-                notification.events.unsubscribe(e,currentUser.get());
-            });
+            currentUser.get().getSubscribedEvents().removeAll(events);
+//            events.stream().forEach(e -> {
+//                notification.events.unsubscribe(e,currentUser.get());
+//            });
             return "unsubscribed";
         }
         return "user: "+username+" not exists";
@@ -89,19 +96,21 @@ public class UserService {
         Optional<User> currentUser = getCurrentUser(username);
 
         if (currentUser.isPresent()) {
-            notification.events.unsubscribeFromAllEvents(currentUser.get());
+            currentUser.get().getSubscribedEvents().removeAll(Set.of(Events.values()));
+//            notification.events.unsubscribeFromAllEvents(currentUser.get());
             return "unsubscribed from all events";
         }
         return "user: "+username+" not exists";
     }
     private Optional<User> getCurrentUser(String username) {
-        return users.stream().filter(user -> user.getUsername().equals(username)).findFirst();
+        return Optional.ofNullable(users.get(username));
     }
 
     public static void disconnected(User user){
-        users.remove(user);
-        notification.events.unsubscribeFromAllEvents(user);
-        notification.deleteUserNotification(EventMessageRequest.builder().from(user.getUsername()).message("left/deleted").build());
+        users.remove(user.getUsername());
+        //unsubscribeFromAllEvents(user.getUsername());
+        //notification.eventsManager.unsubscribeFromAllEvents(user);
+        notification.deleteUserNotification(MessageRequest.builder().from(user.getUsername()).message("left").build());
     }
 
 

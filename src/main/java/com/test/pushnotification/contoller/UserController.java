@@ -1,8 +1,9 @@
 package com.test.pushnotification.contoller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.test.pushnotification.model.User;
 import com.test.pushnotification.publisher.Events;
-import com.test.pushnotification.request.EventMessageRequest;
+import com.test.pushnotification.request.MessageRequest;
 import com.test.pushnotification.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -23,7 +24,7 @@ public class UserController {
 
     @GetMapping(value = "/user/{username}" , produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     @Operation(summary = "Create new user and establish a connection")
-    public SseEmitter createNewUser(@PathVariable("username") String username){
+    public SseEmitter createNewUser(@PathVariable("username") String username) throws JsonProcessingException {
         System.out.println("new joiner:"+username);
         User user = new User(username);
         return userService.addUser(user)? user.getSseEmitter() : null;
@@ -31,7 +32,7 @@ public class UserController {
 
     @PostMapping("/message")
     @Operation(summary = "Send a message")
-    public ResponseEntity<String> createNewMessage(@RequestBody EventMessageRequest request){
+    public ResponseEntity<String> createNewMessage(@RequestBody MessageRequest request){
 
         System.out.println(request.getFrom()+": "+request.getMessage());
         return ResponseEntity.ok(userService.newMessage(request));
