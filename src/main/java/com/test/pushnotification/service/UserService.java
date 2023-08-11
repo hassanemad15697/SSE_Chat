@@ -3,10 +3,12 @@ package com.test.pushnotification.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.test.pushnotification.Notifications.Notification;
+import com.test.pushnotification.Notifications.ServerNotifications;
 import com.test.pushnotification.model.Group;
 import com.test.pushnotification.model.User;
 import com.test.pushnotification.publisher.Events;
 import com.test.pushnotification.request.MessageRequest;
+import com.test.pushnotification.singleton.ObjectMapperSingleton;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -19,7 +21,7 @@ public class UserService {
     static Notification notification = new Notification();
     static Map<String,User> users = new ConcurrentHashMap<>();
 
-    static ObjectMapper objectMapper = new ObjectMapper();
+    ObjectMapper objectMapper = ObjectMapperSingleton.getInstance();
     public Boolean addUser(User user) throws JsonProcessingException {
         //check if the user not exists in the list
         if (!users.containsKey(user.getUsername())) {
@@ -28,9 +30,7 @@ public class UserService {
             notification.getEventsManager().addNewUser(user);
             this.subscribe(user.getUsername(), Set.of(Events.usersList,Events.newMessage,Events.userCreate,Events.userDelete));
 
-
-
-            notification.serverNotification(MessageRequest.builder().message(objectMapper.writeValueAsString(users.keySet())).build(),user);
+            notification.serverNotification(ServerNotifications.sendUsersAndGroupListOnJoin,user);
             notification.newUserNotification(MessageRequest.builder().from(user.getUsername()).to("General Group").message(user.getUsername()+" joined").build());
 
             user.getSseEmitter().onCompletion(() -> {

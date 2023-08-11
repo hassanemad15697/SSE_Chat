@@ -20,7 +20,7 @@ import java.util.Set;
 public class User implements EventListener {
 
     private String username;
-    private List<String> message = new ArrayList<>();
+    private List<Message> message = new ArrayList<>();
     private Set<Events> subscribedEvents = new HashSet<>();
     private SseEmitter sseEmitter = new SseEmitter( Long.MAX_VALUE);
 
@@ -31,6 +31,7 @@ public class User implements EventListener {
     @Override
     public void update(Message eventMessage) throws JsonProcessingException {
         String responseAsJson = new ObjectMapper().writeValueAsString(eventMessage);
+        this.message.add(eventMessage);
         try {
             this.getSseEmitter().send(responseAsJson);
         } catch (IOException e) {

@@ -1,6 +1,5 @@
 package com.test.pushnotification.Notifications;
 
-import com.test.pushnotification.model.Group;
 import com.test.pushnotification.model.Message;
 import com.test.pushnotification.model.User;
 import com.test.pushnotification.publisher.EventManager;
@@ -39,8 +38,13 @@ public class Notification {
     private void notify(Message EventMessage) {
         eventsManager.notify(EventMessage);
     }
-    public void serverNotification(MessageRequest serverRequestMessage, User user) {
-        Message serverEventMessage  = Message.builder().eventType(Events.usersList).from("SERVER").to(user.getUsername()).message(serverRequestMessage.getMessage()).build();
+    public void serverNotification(ServerNotifications serverRequestMessage, User user) {
+        Message serverEventMessage = null;
+        switch (serverRequestMessage){
+            case sendUsersAndGroupListOnJoin:
+                serverEventMessage  = Message.builder().eventType(Events.usersList).from("SERVER").to(user.getUsername()).message(eventsManager.sendListsToNewUser()).build();
+                break;
+        }
         eventsManager.notify(serverEventMessage);
     }
 }
