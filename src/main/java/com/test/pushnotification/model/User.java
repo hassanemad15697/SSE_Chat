@@ -2,9 +2,13 @@ package com.test.pushnotification.model;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.test.pushnotification.events.EventType;
+import com.test.pushnotification.events.ServerEventTypes;
 import com.test.pushnotification.listeners.EventListener;
-import com.test.pushnotification.publisher.Events;
+import com.test.pushnotification.events.UserEventTypes;
+import com.test.pushnotification.request.Message;
 import com.test.pushnotification.service.UserService;
+import com.test.pushnotification.singleton.AllUsers;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
@@ -15,29 +19,53 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import static com.test.pushnotification.service.UserService.disconnected;
+
 @Setter
 @Getter
 public class User implements EventListener {
 
+    // username (identifier)
     private String username;
-    private List<Message> message = new ArrayList<>();
-    private Set<Events> subscribedEvents = new HashSet<>();
-    private SseEmitter sseEmitter = new SseEmitter( Long.MAX_VALUE);
+    // save all the messages that this user has received
+    private List<Message> message;
+    // SSE Emitter object to establish the connection between the client and the sever
+    private SseEmitter sseEmitter;
+    private Boolean isActive;
 
     public User(String username) {
         this.username=username;
+        sseEmitter = new SseEmitter( Long.MAX_VALUE);
+        message = new ArrayList<>();
+        isActive = true;
+        this.getSseEmitter().onCompletion(() -> {
+            System.out.println(username+" disconnected");
+            disconnected(username);
+        });
+        this.getSseEmitter().onTimeout(() -> {
+            disconnected(username);
+        });
+        this.getSseEmitter().onError(throwable -> {
+            disconnected(username);
+        });
     }
 
     @Override
-    public void update(Message eventMessage) throws JsonProcessingException {
-        String responseAsJson = new ObjectMapper().writeValueAsString(eventMessage);
+    public void update(Message eventMessage) {
+        String responseAsJson = null;
+        try {
+            responseAsJson = new ObjectMapper().writeValueAsString(eventMessage);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
         this.message.add(eventMessage);
         try {
             this.getSseEmitter().send(responseAsJson);
         } catch (IOException e) {
-            UserService.disconnected(this);
+            disconnected(username);
         }
     }
+
 
 
 }

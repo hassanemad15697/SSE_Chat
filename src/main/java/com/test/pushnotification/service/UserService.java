@@ -3,115 +3,71 @@ package com.test.pushnotification.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.test.pushnotification.Notifications.Notification;
-import com.test.pushnotification.Notifications.ServerNotifications;
-import com.test.pushnotification.model.Group;
+import com.test.pushnotification.events.EventType;
+import com.test.pushnotification.events.ServerEventTypes;
+import com.test.pushnotification.events.UserEventTypes;
 import com.test.pushnotification.model.User;
-import com.test.pushnotification.publisher.Events;
 import com.test.pushnotification.request.MessageRequest;
+import com.test.pushnotification.request.ServerMessageRequest;
+import com.test.pushnotification.singleton.AllUsers;
 import com.test.pushnotification.singleton.ObjectMapperSingleton;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.Optional;
+import java.util.Set;
 
 @Service
 public class UserService {
 
 
-    static Notification notification = new Notification();
-    static Map<String,User> users = new ConcurrentHashMap<>();
+    private static final Notification notification = new Notification();
 
     ObjectMapper objectMapper = ObjectMapperSingleton.getInstance();
-    public Boolean addUser(User user) throws JsonProcessingException {
+
+    public User addUser(String username) throws JsonProcessingException {
         //check if the user not exists in the list
-        if (!users.containsKey(user.getUsername())) {
-            //add the user to the list
-            users.put(user.getUsername(),user);
-            notification.getEventsManager().addNewUser(user);
-            this.subscribe(user.getUsername(), Set.of(Events.usersList,Events.newMessage,Events.userCreate,Events.userDelete));
-
-            notification.serverNotification(ServerNotifications.sendUsersAndGroupListOnJoin,user);
-            notification.newUserNotification(MessageRequest.builder().from(user.getUsername()).to("General Group").message(user.getUsername()+" joined").build());
-
-            user.getSseEmitter().onCompletion(() -> {
-                this.disconnected(user);
-            });
-            user.getSseEmitter().onTimeout(() -> {
-                this.disconnected(user);
-            });
-            user.getSseEmitter().onError(throwable -> {
-                this.disconnected(user);
-            });
-            return true;
+        System.out.println("check if the user not exists in the list");
+        if (AllUsers.hasUser(username)) {
+            // TODO: throw an exception
+            return null;
         }
-        return false;
+        //add the user to the list
+        System.out.println("add the user to the list");
+        User user = AllUsers.addUserByUsername(username);
+        notification.serverNotification(new ServerMessageRequest(ServerEventTypes.newJoiner,username+" joined!"));
+        notification.serverNotification(new ServerMessageRequest(ServerEventTypes.sendUsersAndGroupsListForNewJoiner,AllUsers.sendListsToNewUser()));
+        return user;
     }
 
-    public String newMessage(MessageRequest request) {
-        Optional<User> currentUser = getCurrentUser(request.getFrom());
-        if (currentUser.isPresent()) {
-            notification.newMessageNotification(MessageRequest.builder().from(request.getFrom()).message(request.getMessage()).build());
-            return "Sent";
-        }
-        return "user: "+request.getFrom()+" not exists";
+    public void newMessage(MessageRequest request) {
+        notification.newMessageNotification(request);
     }
 
-
-
-    public String delete(String username) {
-        Optional<User> currentUser = getCurrentUser(username);
-        if (currentUser.isPresent()) {
-            currentUser.get().getSseEmitter().complete();
-            return "Deleted";
-        }
-        return "User not exists to delete";
-
+    public void delete(String username) {
+        getCurrentUser(username).getSseEmitter().complete();;
     }
 
-    public String subscribe(String username, Set<Events> events) {
-        Optional<User> currentUser = getCurrentUser(username);
-        if (currentUser.isPresent()) {
-            currentUser.get().setSubscribedEvents(events);
-//            events.stream().forEach(e -> {
-//                notification.events.subscribe(e,currentUser.get());
-//            });
-            return "subscribed";
-        }
-        return "user: "+username+" not exists";
-
-    }
-    public String unsubscribe(String username, Set<Events> events) {
-        Optional<User> currentUser = getCurrentUser(username);
-        if (currentUser.isPresent()) {
-            currentUser.get().getSubscribedEvents().removeAll(events);
-//            events.stream().forEach(e -> {
-//                notification.events.unsubscribe(e,currentUser.get());
-//            });
-            return "unsubscribed";
-        }
-        return "user: "+username+" not exists";
+    public void subscribe(String username, Set<EventType> events) {
+        AllUsers.subscribe(username, events);
     }
 
-    public String unsubscribeFromAllEvents(String username){
-        Optional<User> currentUser = getCurrentUser(username);
-
-        if (currentUser.isPresent()) {
-            currentUser.get().getSubscribedEvents().removeAll(Set.of(Events.values()));
-//            notification.events.unsubscribeFromAllEvents(currentUser.get());
-            return "unsubscribed from all events";
-        }
-        return "user: "+username+" not exists";
-    }
-    private Optional<User> getCurrentUser(String username) {
-        return Optional.ofNullable(users.get(username));
+    public void unsubscribe(String username, Set<EventType> events) {
+        AllUsers.unsubscribe(username, events);
     }
 
-    public static void disconnected(User user){
-        users.remove(user.getUsername());
-        //unsubscribeFromAllEvents(user.getUsername());
-        //notification.eventsManager.unsubscribeFromAllEvents(user);
-        notification.deleteUserNotification(MessageRequest.builder().from(user.getUsername()).message("left").build());
+    public void unsubscribeFromAllEvents(String username) {
+        AllUsers.unsubscribeFromAllEvents(username);
     }
 
+    private User getCurrentUser(String username) {
+        return AllUsers.getUserByUsername(username);
+    }
 
+    public static void disconnected(String username) {
+        AllUsers.deleteUserByUsername(username);
+        System.out.println("T4");
+        notification.serverNotification(new ServerMessageRequest(ServerEventTypes.sendUsersAndGroupsListForNewJoiner,AllUsers.sendListsToNewUser()));
+        System.out.println("T3");
+        notification.serverNotification(new ServerMessageRequest(ServerEventTypes.userLeft,username+" left!"));
+    }
 }
