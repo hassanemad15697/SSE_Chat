@@ -2,8 +2,7 @@ package com.test.pushnotification.contoller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.test.pushnotification.events.EventType;
-import com.test.pushnotification.events.UserEventTypes;
-import com.test.pushnotification.request.MessageRequest;
+import com.test.pushnotification.request.UserMessageRequest;
 import com.test.pushnotification.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -34,7 +33,7 @@ public class UserController {
 
     @PostMapping("/message")
     @Operation(summary = "Send a message")
-    public ResponseEntity<Integer> createNewMessage(@RequestBody MessageRequest request){
+    public ResponseEntity<Integer> createNewMessage(@RequestBody UserMessageRequest request){
 
         System.out.println(request.getFrom()+": "+request.getMessage());
         userService.newMessage(request);

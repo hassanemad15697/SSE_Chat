@@ -1,20 +1,16 @@
 package com.test.pushnotification.publisher;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.test.pushnotification.events.ServerEventTypes;
 import com.test.pushnotification.events.UserEventTypes;
 import com.test.pushnotification.listeners.EventListener;
-import com.test.pushnotification.request.MessageRequest;
+import com.test.pushnotification.request.UserMessageRequest;
 import com.test.pushnotification.request.ServerMessageRequest;
 import com.test.pushnotification.singleton.AllUsers;
-import com.test.pushnotification.model.Group;
 import com.test.pushnotification.request.Message;
 import com.test.pushnotification.singleton.ObjectMapperSingleton;
 import lombok.Getter;
 
-import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 
 @Getter
 public class EventManager {
@@ -27,11 +23,11 @@ public class EventManager {
 
         if (eventMessage.getEventType() instanceof ServerEventTypes){
             ServerMessageRequest message = (ServerMessageRequest) eventMessage;
-            ServerEventTypes eventType = (ServerEventTypes) message.getEventType();
+            ServerEventTypes eventType = message.getEventType();
             AllUsers.getAllSubscribersToEvent(eventType).forEach(user -> user.update(message));
         }else if(eventMessage.getEventType() instanceof UserEventTypes){
-            MessageRequest message = (MessageRequest) eventMessage;
-            Objects.requireNonNull(AllUsers.getUserByUsername(((MessageRequest) eventMessage).getTo())).update(message);
+            UserMessageRequest message = (UserMessageRequest) eventMessage;
+            Objects.requireNonNull(AllUsers.getUserByUsername(((UserMessageRequest) eventMessage).getTo())).update(message);
         }
     }
 

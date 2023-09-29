@@ -5,15 +5,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.test.pushnotification.Notifications.Notification;
 import com.test.pushnotification.events.EventType;
 import com.test.pushnotification.events.ServerEventTypes;
-import com.test.pushnotification.events.UserEventTypes;
 import com.test.pushnotification.model.User;
-import com.test.pushnotification.request.MessageRequest;
+import com.test.pushnotification.request.UserMessageRequest;
 import com.test.pushnotification.request.ServerMessageRequest;
 import com.test.pushnotification.singleton.AllUsers;
 import com.test.pushnotification.singleton.ObjectMapperSingleton;
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
 import java.util.Set;
 
 @Service
@@ -24,7 +22,7 @@ public class UserService {
 
     ObjectMapper objectMapper = ObjectMapperSingleton.getInstance();
 
-    public User addUser(String username) throws JsonProcessingException {
+    public User addUser(String username) {
         //check if the user not exists in the list
         System.out.println("check if the user not exists in the list");
         if (AllUsers.hasUser(username)) {
@@ -39,7 +37,7 @@ public class UserService {
         return user;
     }
 
-    public void newMessage(MessageRequest request) {
+    public void newMessage(UserMessageRequest request) {
         notification.newMessageNotification(request);
     }
 

@@ -2,8 +2,7 @@ package com.test.pushnotification.Notifications;
 
 import com.test.pushnotification.request.Message;
 import com.test.pushnotification.publisher.EventManager;
-import com.test.pushnotification.events.UserEventTypes;
-import com.test.pushnotification.request.MessageRequest;
+import com.test.pushnotification.request.UserMessageRequest;
 import com.test.pushnotification.request.ServerMessageRequest;
 import lombok.Getter;
 
@@ -18,7 +17,7 @@ public class Notification {
         eventsManager = new EventManager();
     }
 
-    public void newMessageNotification(MessageRequest newMessageRequestMessage) {
+    public void newMessageNotification(UserMessageRequest newMessageRequestMessage) {
         notify(newMessageRequestMessage);
     }
 
