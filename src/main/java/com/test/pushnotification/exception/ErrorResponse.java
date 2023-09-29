@@ -1,6 +1,5 @@
 package com.test.pushnotification.exception;
 
-import com.test.pushnotification.exception.ErrorCode;
 import com.test.pushnotification.response.Response;
 import lombok.*;
 
@@ -10,7 +9,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class ErrorResponse  implements Response {
+public class ErrorResponse implements Response {
     private ErrorCode errorCode;
     private String message;
 }

@@ -8,6 +8,6 @@ import lombok.*;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class BasicResponse implements Response{
+public class BasicResponse implements Response {
     private String message;
 }

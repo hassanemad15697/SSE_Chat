@@ -12,7 +12,7 @@ public class ErrorValidationHandler {
     @ExceptionHandler(ChatException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ResponseBody
-    public ErrorResponse onError(ChatException exception){
+    public ErrorResponse onError(ChatException exception) {
         return ErrorResponse.builder().errorCode(exception.getErrorCode()).message(exception.getMessage()).build();
     }
 }

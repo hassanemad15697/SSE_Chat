@@ -23,47 +23,49 @@ public class UserController {
     private UserService userService;
 
     // keep it GET to be able to test it from browser
-    @GetMapping(value = "/connect/{username}" , produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    @GetMapping(value = "/connect/{username}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     @Operation(summary = "Create new user and establish a connection")
     public SseEmitter createNewUser(@PathVariable("username") String username) {
         return userService.addUser(username).getSseEmitter();
     }
-    @GetMapping(value = "/get/{username}" )
+
+    @GetMapping(value = "/get/{username}")
     @Operation(summary = "Get user data")
     public Response getUser(@PathVariable("username") String username) {
         return userService.getUser(username);
     }
+
     @PostMapping("/message")
     @Operation(summary = "Send a message")
-    public ResponseEntity<Integer> createNewMessage(@RequestBody UserMessageRequest request){
+    public ResponseEntity<Integer> createNewMessage(@RequestBody UserMessageRequest request) {
         userService.newMessage(request);
         return ResponseEntity.ok(200);
     }
 
     @DeleteMapping("/delete")
     @Operation(summary = "Delete a user and close the connection")
-    public ResponseEntity<Integer> deleteUser(@RequestParam("username") String username){
+    public ResponseEntity<Integer> deleteUser(@RequestParam("username") String username) {
         userService.delete(username);
         return ResponseEntity.ok(200);
     }
 
     @PostMapping("/subscribe")
     @Operation(summary = "Subscribe an event")
-    public ResponseEntity<Integer> subscribeUser(@RequestParam("username") String username, @RequestParam("events") UserEventTypes event){
-        userService.subscribe(username,event);
+    public ResponseEntity<Integer> subscribeUser(@RequestParam("username") String username, @RequestParam("events") UserEventTypes event) {
+        userService.subscribe(username, event);
         return ResponseEntity.ok(200);
     }
 
     @PostMapping("/unsubscribe")
     @Operation(summary = "Unsubscribe an event")
-    public ResponseEntity<Integer> unsubscribeUser(@RequestParam("username") String username, @RequestParam("events") UserEventTypes event){
-        userService.unsubscribe(username,event);
+    public ResponseEntity<Integer> unsubscribeUser(@RequestParam("username") String username, @RequestParam("events") UserEventTypes event) {
+        userService.unsubscribe(username, event);
         return ResponseEntity.ok(200);
     }
 
-    @PostMapping("/unsubscribe-all")
+    @PostMapping("/unsubscribe/all")
     @Operation(summary = "Unsubscribe an event")
-    public ResponseEntity<Integer> unsubscribeUserFromAllEvents(@RequestParam("username") String username){
+    public ResponseEntity<Integer> unsubscribeUserFromAllEvents(@RequestParam("username") String username) {
         userService.unsubscribeFromAllEvents(username);
         return ResponseEntity.ok(200);
     }

@@ -27,8 +27,8 @@ public class User implements EventListener {
     private Boolean isActive;
 
     public User(String username) {
-        this.username=username;
-        sseEmitter = new SseEmitter( Long.MAX_VALUE);
+        this.username = username;
+        sseEmitter = new SseEmitter(Long.MAX_VALUE);
         message = new ArrayList<>();
         isActive = true;
         this.getSseEmitter().onCompletion(() -> {
@@ -57,7 +57,6 @@ public class User implements EventListener {
             disconnected(username);
         }
     }
-
 
 
 }

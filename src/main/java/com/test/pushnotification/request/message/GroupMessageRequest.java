@@ -6,9 +6,11 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.io.Serializable;
+
 @Setter
-@Getter @Builder
-public class GroupMessageRequest implements Message , Serializable {
+@Getter
+@Builder
+public class GroupMessageRequest implements Message, Serializable {
     private String from;
     private String groupName;
     private GroupEventTypes eventType;

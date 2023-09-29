@@ -1,10 +1,6 @@
 package com.test.pushnotification.response;
 
-import com.test.pushnotification.request.message.Message;
 import lombok.*;
-import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
-
-import java.util.List;
 
 @Data
 @Setter

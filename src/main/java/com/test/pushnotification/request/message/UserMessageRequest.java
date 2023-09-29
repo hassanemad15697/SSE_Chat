@@ -1,14 +1,15 @@
 package com.test.pushnotification.request.message;
 
 import com.test.pushnotification.events.UserEventTypes;
-import lombok.*;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.io.Serializable;
 
 
 @Setter
 @Getter
-public class UserMessageRequest  implements Serializable ,Message{
+public class UserMessageRequest implements Serializable, Message {
     private String from;
     private String to;
     private UserEventTypes eventType;
