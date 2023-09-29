@@ -1,16 +1,15 @@
 package com.test.pushnotification.publisher;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.test.pushnotification.events.ServerEventTypes;
+import com.test.pushnotification.events.GroupEventTypes;
+import com.test.pushnotification.events.ServerEventType;
 import com.test.pushnotification.events.UserEventTypes;
 import com.test.pushnotification.listeners.EventListener;
-import com.test.pushnotification.request.UserMessageRequest;
-import com.test.pushnotification.request.ServerMessageRequest;
+import com.test.pushnotification.request.message.UserMessageRequest;
+import com.test.pushnotification.request.message.ServerMessageRequest;
 import com.test.pushnotification.singleton.ServerManager;
-import com.test.pushnotification.request.Message;
+import com.test.pushnotification.request.message.Message;
 import com.test.pushnotification.singleton.ObjectMapperSingleton;
 import lombok.Getter;
-
-import java.util.Objects;
 
 @Getter
 public class EventManager {
@@ -21,26 +20,18 @@ public class EventManager {
     public void notify(Message eventMessage) {
         EventListener listener;
 
-        if (eventMessage.getEventType() instanceof ServerEventTypes){
+        if (eventMessage.getEventType() instanceof ServerEventType){
             ServerMessageRequest message = (ServerMessageRequest) eventMessage;
-            ServerEventTypes eventType = message.getEventType();
+            ServerEventType eventType = message.getEventType();
             ServerManager.getAllSubscribersToEvent(eventType).forEach(user -> user.update(message));
         }else if(eventMessage.getEventType() instanceof UserEventTypes){
             UserMessageRequest message = (UserMessageRequest) eventMessage;
-            Objects.requireNonNull(ServerManager.getUserByUsername(((UserMessageRequest) eventMessage).getTo())).update(message);
+            ServerManager.getUserByUsername(message.getTo()).update(message);
+        }else if(eventMessage.getEventType() instanceof GroupEventTypes){
+//            GroupMessageRequest message = (GroupMessageRequest) eventMessage;
+//            ServerManager.getGroupByName(message.getToGroupName()).update(message);
         }
     }
-
-
-//    public void addNewGroup(Group group) {
-//        this.groups.put(group.getGroupName(), group);
-//    }
-//    public List<String> getAllGroupsNames() {
-//        return List.copyOf(groups.keySet());
-//    }
-//    public List<Group> getAllGroups() {
-//        return List.copyOf(groups.values());
-//    }
 
 
 }

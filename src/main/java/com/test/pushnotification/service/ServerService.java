@@ -1,18 +1,17 @@
 package com.test.pushnotification.service;
 
 
-import com.test.pushnotification.events.EventType;
-import com.test.pushnotification.events.ServerEventTypes;
+import com.test.pushnotification.events.ServerEventType;
 import com.test.pushnotification.singleton.ServerManager;
 import org.springframework.stereotype.Service;
 
 @Service
 public class ServerService {
-    public void subscribe(String username, ServerEventTypes event) {
+    public void subscribe(String username, ServerEventType event) {
         ServerManager.subscribe(username, event);
     }
 
-    public void unsubscribe(String username, ServerEventTypes event) {
+    public void unsubscribe(String username, ServerEventType event) {
         ServerManager.unsubscribe(username, event);
     }
 

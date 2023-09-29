@@ -3,16 +3,13 @@ package com.test.pushnotification.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.test.pushnotification.Notifications.Notification;
 import com.test.pushnotification.events.EventType;
-import com.test.pushnotification.events.ServerEventTypes;
+import com.test.pushnotification.events.ServerEventType;
 import com.test.pushnotification.model.User;
-import com.test.pushnotification.request.UserMessageRequest;
-import com.test.pushnotification.request.ServerMessageRequest;
+import com.test.pushnotification.request.message.UserMessageRequest;
+import com.test.pushnotification.request.message.ServerMessageRequest;
 import com.test.pushnotification.singleton.ServerManager;
 import com.test.pushnotification.singleton.ObjectMapperSingleton;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
-import java.util.Set;
 
 @Service
 public class UserService {
@@ -30,8 +27,8 @@ public class UserService {
         }
         //add the user to the list
         User user = ServerManager.addUserByUsername(username);
-        notification.serverNotification(new ServerMessageRequest(ServerEventTypes.newJoiner,username+" joined!"));
-        notification.serverNotification(new ServerMessageRequest(ServerEventTypes.updatedUsersAndGroupsList, ServerManager.sendListsToNewUser()));
+        notification.serverNotification(serverMessageRequestBuilder(ServerEventType.newJoiner,username+" joined!"));
+        notification.serverNotification(serverMessageRequestBuilder(ServerEventType.updatedUsersAndGroupsList, ServerManager.updatedLists()));
         return user;
     }
 
@@ -61,7 +58,12 @@ public class UserService {
 
     public static void disconnected(String username) {
         ServerManager.deleteUserByUsername(username);
-        notification.serverNotification(new ServerMessageRequest(ServerEventTypes.updatedUsersAndGroupsList, ServerManager.sendListsToNewUser()));
-        notification.serverNotification(new ServerMessageRequest(ServerEventTypes.userLeft,username+" left!"));
+        notification.serverNotification(serverMessageRequestBuilder(ServerEventType.updatedUsersAndGroupsList, ServerManager.updatedLists()));
+        notification.serverNotification(serverMessageRequestBuilder(ServerEventType.userLeft,username+" left!"));
+    }
+
+
+    private static ServerMessageRequest serverMessageRequestBuilder(ServerEventType eventTypes, Object message) {
+        return ServerMessageRequest.builder().eventType( eventTypes).message(message).build();
     }
 }

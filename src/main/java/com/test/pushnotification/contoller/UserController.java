@@ -1,9 +1,7 @@
 package com.test.pushnotification.contoller;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.test.pushnotification.events.EventType;
 import com.test.pushnotification.events.UserEventTypes;
-import com.test.pushnotification.request.UserMessageRequest;
+import com.test.pushnotification.request.message.UserMessageRequest;
 import com.test.pushnotification.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -14,23 +12,19 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
-import java.util.List;
-import java.util.Set;
-
 @RestController
 @RequestMapping("/user")
 @CrossOrigin("*")
-@Tag(name = "User Events")
+@Tag(name = "Users Endpoints")
 @Slf4j
 public class UserController {
     @Autowired
     private UserService userService;
 
-    // keep it get to be able to test it from browser
+    // keep it GET to be able to test it from browser
     @GetMapping(value = "/connect/{username}" , produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     @Operation(summary = "Create new user and establish a connection")
-    public SseEmitter createNewUser(@PathVariable("username") String username) throws JsonProcessingException {
-        System.out.println("new joiner:"+username);
+    public SseEmitter createNewUser(@PathVariable("username") String username) {
         return userService.addUser(username).getSseEmitter();
     }
 

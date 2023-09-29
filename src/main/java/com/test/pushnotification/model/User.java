@@ -3,7 +3,7 @@ package com.test.pushnotification.model;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.test.pushnotification.listeners.EventListener;
-import com.test.pushnotification.request.Message;
+import com.test.pushnotification.request.message.Message;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
