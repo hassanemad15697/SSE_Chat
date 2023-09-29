@@ -7,13 +7,20 @@ import com.test.pushnotification.events.ServerEventType;
 import com.test.pushnotification.model.User;
 import com.test.pushnotification.request.message.UserMessageRequest;
 import com.test.pushnotification.request.message.ServerMessageRequest;
+import com.test.pushnotification.response.GroupResponse;
+import com.test.pushnotification.response.Response;
+import com.test.pushnotification.response.UserResponse;
 import com.test.pushnotification.singleton.ServerManager;
 import com.test.pushnotification.singleton.ObjectMapperSingleton;
+import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
 public class UserService {
 
+    @Autowired
+    private ModelMapper modelMapper;
 
     private static final Notification notification = new Notification();
 
@@ -31,13 +38,15 @@ public class UserService {
         notification.serverNotification(serverMessageRequestBuilder(ServerEventType.updatedUsersAndGroupsList, ServerManager.updatedLists()));
         return user;
     }
-
+    public Response getUser(String username) {
+        return modelMapper.map(getUserObject(username), UserResponse.class);
+    }
     public void newMessage(UserMessageRequest request) {
         notification.newMessageNotification(request);
     }
 
     public void delete(String username) {
-        getCurrentUser(username).getSseEmitter().complete();;
+        getUserObject(username).getSseEmitter().complete();;
     }
 
     public void subscribe(String username, EventType event) {
@@ -52,7 +61,7 @@ public class UserService {
         ServerManager.unsubscribeFromAllEvents(username);
     }
 
-    private User getCurrentUser(String username) {
+    private User getUserObject(String username) {
         return ServerManager.getUserByUsername(username);
     }
 
@@ -66,4 +75,6 @@ public class UserService {
     private static ServerMessageRequest serverMessageRequestBuilder(ServerEventType eventTypes, Object message) {
         return ServerMessageRequest.builder().eventType( eventTypes).message(message).build();
     }
+
+
 }

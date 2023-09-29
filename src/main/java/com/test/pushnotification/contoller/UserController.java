@@ -2,6 +2,7 @@ package com.test.pushnotification.contoller;
 
 import com.test.pushnotification.events.UserEventTypes;
 import com.test.pushnotification.request.message.UserMessageRequest;
+import com.test.pushnotification.response.Response;
 import com.test.pushnotification.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -27,7 +28,11 @@ public class UserController {
     public SseEmitter createNewUser(@PathVariable("username") String username) {
         return userService.addUser(username).getSseEmitter();
     }
-
+    @GetMapping(value = "/get/{username}" )
+    @Operation(summary = "Get user data")
+    public Response getUser(@PathVariable("username") String username) {
+        return userService.getUser(username);
+    }
     @PostMapping("/message")
     @Operation(summary = "Send a message")
     public ResponseEntity<Integer> createNewMessage(@RequestBody UserMessageRequest request){

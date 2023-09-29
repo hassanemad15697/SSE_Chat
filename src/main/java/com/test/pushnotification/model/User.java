@@ -32,7 +32,6 @@ public class User implements EventListener {
         message = new ArrayList<>();
         isActive = true;
         this.getSseEmitter().onCompletion(() -> {
-            System.out.println(username+" disconnected");
             disconnected(username);
         });
         this.getSseEmitter().onTimeout(() -> {

@@ -7,8 +7,8 @@ import lombok.*;
 @Getter
 @Builder
 @AllArgsConstructor
-public class NewMemberRequest {
+public class GroupMemberRequest {
     private String groupName;
     private String adminName;
-    private String newMemberName;
+    private String memberName;
 }

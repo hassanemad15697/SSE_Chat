@@ -1,5 +1,6 @@
 package com.test.pushnotification.Notifications;
 
+import com.test.pushnotification.request.message.GroupMessageRequest;
 import com.test.pushnotification.request.message.Message;
 import com.test.pushnotification.publisher.EventManager;
 import com.test.pushnotification.request.message.UserMessageRequest;
@@ -24,9 +25,9 @@ public class Notification {
     public void serverNotification(ServerMessageRequest serverMessageRequest) {
         eventsManager.notify(serverMessageRequest);
     }
-//    public void groupNotification(GroupMessageRequest groupMessageRequest) {
-//        eventsManager.notify(groupMessageRequest);
-//    }
+    public void groupNotification(GroupMessageRequest groupMessageRequest) {
+        eventsManager.notify(groupMessageRequest);
+    }
     private void notify(Message EventMessage) {
         eventsManager.notify(EventMessage);
     }

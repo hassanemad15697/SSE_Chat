@@ -4,6 +4,8 @@ import com.test.pushnotification.events.GroupEventTypes;
 import com.test.pushnotification.events.ServerEventType;
 import com.test.pushnotification.events.UserEventTypes;
 import com.test.pushnotification.listeners.EventListener;
+import com.test.pushnotification.model.Group;
+import com.test.pushnotification.request.message.GroupMessageRequest;
 import com.test.pushnotification.request.message.UserMessageRequest;
 import com.test.pushnotification.request.message.ServerMessageRequest;
 import com.test.pushnotification.singleton.ServerManager;
@@ -28,8 +30,8 @@ public class EventManager {
             UserMessageRequest message = (UserMessageRequest) eventMessage;
             ServerManager.getUserByUsername(message.getTo()).update(message);
         }else if(eventMessage.getEventType() instanceof GroupEventTypes){
-//            GroupMessageRequest message = (GroupMessageRequest) eventMessage;
-//            ServerManager.getGroupByName(message.getToGroupName()).update(message);
+            GroupMessageRequest message = (GroupMessageRequest) eventMessage;
+            ServerManager.getGroupByName(message.getGroupName()).update(message);
         }
     }
 

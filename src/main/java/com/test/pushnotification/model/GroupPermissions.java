@@ -6,5 +6,5 @@ public enum GroupPermissions {
     DELETE_MEMBER,
     LEAVE_GROUP,
     ASSIGN_NEW_ROLE,
-    DELETE_GROUP
+    DELETE_ROLE_FROM_USER, DELETE_GROUP
 }

@@ -11,6 +11,7 @@ import com.test.pushnotification.response.GroupMemberResponse;
 import com.test.pushnotification.response.Response;
 import com.test.pushnotification.singleton.ServerManager;
 import lombok.Data;
+import lombok.Getter;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -19,6 +20,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Data
+@Getter
 public class Group implements EventListener {
     private String groupName;
     // map contains usernames as a key and a list of permissions associated to this user
@@ -43,12 +45,6 @@ public class Group implements EventListener {
         });
     }
 
-
-    public Response sendNewMessage(GroupMessageRequest messageRequest) {
-        this.update(groupMessageRequestBuilder(messageRequest.getFrom(), GroupEventTypes.newMessage, messageRequest.getMessage()));
-        return BasicResponse.builder().message(messageRequest.getFrom() + " sent: " + messageRequest.getMessage()).build();
-    }
-
     public Response addMember(String admin, String usernameToAdd) {
         if (!isGroupMemeber(admin)) {
             throw new ChatException(ErrorCode.NOT_GROUP_MEMBER, "member " + admin + " not a group member");
@@ -57,7 +53,9 @@ public class Group implements EventListener {
             throw new ChatException(ErrorCode.USER_DOES_NOT_HAVE_PERMISSION, "member " + admin + " doesn't have permission to add new members");
         }
         if (!this.groupUsersAndRoles.containsKey(usernameToAdd)) {
-            this.groupUsersAndRoles.put(usernameToAdd, Set.of(GroupPermissions.SEND_MESSAGE, GroupPermissions.LEAVE_GROUP));
+            this.groupUsersAndRoles.put(usernameToAdd, new HashSet<>());
+            this.groupUsersAndRoles.get(usernameToAdd).add(GroupPermissions.SEND_MESSAGE);
+            this.groupUsersAndRoles.get(usernameToAdd).add(GroupPermissions.LEAVE_GROUP);
             this.update(groupMessageRequestBuilder(admin, GroupEventTypes.memberJoined, admin + " added " + usernameToAdd + " to " + groupName + " group."));
         }
         return GroupMemberResponse.builder()
@@ -78,8 +76,8 @@ public class Group implements EventListener {
         if (doesNotHavePermission(admin, GroupPermissions.DELETE_MEMBER)) {
             throw new ChatException(ErrorCode.USER_DOES_NOT_HAVE_PERMISSION, "member " + admin + " doesn't have permission to remove members");
         }
-        this.groupUsersAndRoles.remove(userToRemove);
         this.update(groupMessageRequestBuilder(admin, GroupEventTypes.groupDeleted, admin + " deleted " + userToRemove + " from " + groupName + " group."));
+        this.groupUsersAndRoles.remove(userToRemove);
         return BasicResponse.builder().message(userToRemove + " deleted").build();
     }
 
@@ -90,8 +88,8 @@ public class Group implements EventListener {
         if (doesNotHavePermission(username, GroupPermissions.LEAVE_GROUP)) {
             throw new ChatException(ErrorCode.USER_DOES_NOT_HAVE_PERMISSION, "member " + username + " doesn't have permission to leave the group");
         }
-        this.groupUsersAndRoles.remove(username);
         this.update(groupMessageRequestBuilder(username, GroupEventTypes.memberLeft, username + " left the group."));
+        this.groupUsersAndRoles.remove(username);
         return BasicResponse.builder().message(username + " left").build();
     }
 
@@ -114,7 +112,25 @@ public class Group implements EventListener {
                 .permissions(groupUsersAndRoles.get(userToAssign))
                 .build();
     }
-
+    public Response removeRoleFromGroupMember(String admin, String userToAssign, GroupPermissions permission) {
+        if (!isGroupMemeber(admin)) {
+            throw new ChatException(ErrorCode.NOT_GROUP_MEMBER, "member " + admin + " not a group member");
+        }
+        if (!isGroupMemeber(userToAssign)) {
+            throw new ChatException(ErrorCode.NOT_GROUP_MEMBER, "member " + userToAssign + " not a group member");
+        }
+        if (doesNotHavePermission(admin, GroupPermissions.DELETE_ROLE_FROM_USER)) {
+            throw new ChatException(ErrorCode.USER_DOES_NOT_HAVE_PERMISSION, "member " + admin + " doesn't have permission to remove roles");
+        }
+        this.groupUsersAndRoles.get(userToAssign).remove(permission);
+        this.update(groupMessageRequestBuilder(admin, GroupEventTypes.memberWithNewRole, admin + " removed " +  " the permission to " + permission.name()+" from "+userToAssign ));
+        return GroupMemberResponse.builder()
+                .groupName(this.groupName)
+                .modifiedBy(admin)
+                .user(userToAssign)
+                .permissions(groupUsersAndRoles.get(userToAssign))
+                .build();
+    }
     public Response deleteGroup(String admin) {
         if (!isGroupMemeber(admin)) {
             throw new ChatException(ErrorCode.NOT_GROUP_MEMBER, "member " + admin + " not a group member");
