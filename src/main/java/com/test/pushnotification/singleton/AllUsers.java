@@ -38,8 +38,8 @@ public class AllUsers {
     }
 
     public static void deleteUserByUsername(String username) {
-        allUsers.remove(username);
         unsubscribeFromAllEvents(username);
+        allUsers.remove(username);
     }
 
     public static User addUserByUsername(String username) {

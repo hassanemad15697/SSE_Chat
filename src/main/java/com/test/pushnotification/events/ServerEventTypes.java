@@ -1,7 +1,7 @@
 package com.test.pushnotification.events;
 
 public enum ServerEventTypes implements EventType {
-    sendUsersAndGroupsListForNewJoiner,
+    updatedUsersAndGroupsList,
     newJoiner,
     userLeft
 }

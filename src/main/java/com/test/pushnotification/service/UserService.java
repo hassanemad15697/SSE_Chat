@@ -1,6 +1,5 @@
 package com.test.pushnotification.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.test.pushnotification.Notifications.Notification;
 import com.test.pushnotification.events.EventType;
@@ -33,7 +32,7 @@ public class UserService {
         System.out.println("add the user to the list");
         User user = AllUsers.addUserByUsername(username);
         notification.serverNotification(new ServerMessageRequest(ServerEventTypes.newJoiner,username+" joined!"));
-        notification.serverNotification(new ServerMessageRequest(ServerEventTypes.sendUsersAndGroupsListForNewJoiner,AllUsers.sendListsToNewUser()));
+        notification.serverNotification(new ServerMessageRequest(ServerEventTypes.updatedUsersAndGroupsList,AllUsers.sendListsToNewUser()));
         return user;
     }
 
@@ -64,7 +63,7 @@ public class UserService {
     public static void disconnected(String username) {
         AllUsers.deleteUserByUsername(username);
         System.out.println("T4");
-        notification.serverNotification(new ServerMessageRequest(ServerEventTypes.sendUsersAndGroupsListForNewJoiner,AllUsers.sendListsToNewUser()));
+        notification.serverNotification(new ServerMessageRequest(ServerEventTypes.updatedUsersAndGroupsList,AllUsers.sendListsToNewUser()));
         System.out.println("T3");
         notification.serverNotification(new ServerMessageRequest(ServerEventTypes.userLeft,username+" left!"));
     }
