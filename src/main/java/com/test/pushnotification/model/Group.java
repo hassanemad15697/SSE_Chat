@@ -1,9 +1,8 @@
 package com.test.pushnotification.model;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.test.pushnotification.listeners.EventListener;
 import com.test.pushnotification.request.Message;
-import com.test.pushnotification.singleton.AllUsers;
+import com.test.pushnotification.singleton.ServerManager;
 import lombok.Data;
 
 import java.util.Arrays;
@@ -90,6 +89,6 @@ public class Group implements EventListener {
         return this.groupUsersAndRoles.containsKey(username);
     }
     private User getUserByUsername(String username){
-        return AllUsers.getUserByUsername(username);
+        return ServerManager.getUserByUsername(username);
     }
 }

@@ -5,7 +5,7 @@ import com.test.pushnotification.events.UserEventTypes;
 import com.test.pushnotification.listeners.EventListener;
 import com.test.pushnotification.request.UserMessageRequest;
 import com.test.pushnotification.request.ServerMessageRequest;
-import com.test.pushnotification.singleton.AllUsers;
+import com.test.pushnotification.singleton.ServerManager;
 import com.test.pushnotification.request.Message;
 import com.test.pushnotification.singleton.ObjectMapperSingleton;
 import lombok.Getter;
@@ -24,10 +24,10 @@ public class EventManager {
         if (eventMessage.getEventType() instanceof ServerEventTypes){
             ServerMessageRequest message = (ServerMessageRequest) eventMessage;
             ServerEventTypes eventType = message.getEventType();
-            AllUsers.getAllSubscribersToEvent(eventType).forEach(user -> user.update(message));
+            ServerManager.getAllSubscribersToEvent(eventType).forEach(user -> user.update(message));
         }else if(eventMessage.getEventType() instanceof UserEventTypes){
             UserMessageRequest message = (UserMessageRequest) eventMessage;
-            Objects.requireNonNull(AllUsers.getUserByUsername(((UserMessageRequest) eventMessage).getTo())).update(message);
+            Objects.requireNonNull(ServerManager.getUserByUsername(((UserMessageRequest) eventMessage).getTo())).update(message);
         }
     }
 

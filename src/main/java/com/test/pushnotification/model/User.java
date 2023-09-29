@@ -2,22 +2,15 @@ package com.test.pushnotification.model;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.test.pushnotification.events.EventType;
-import com.test.pushnotification.events.ServerEventTypes;
 import com.test.pushnotification.listeners.EventListener;
-import com.test.pushnotification.events.UserEventTypes;
 import com.test.pushnotification.request.Message;
-import com.test.pushnotification.service.UserService;
-import com.test.pushnotification.singleton.AllUsers;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import static com.test.pushnotification.service.UserService.disconnected;
 

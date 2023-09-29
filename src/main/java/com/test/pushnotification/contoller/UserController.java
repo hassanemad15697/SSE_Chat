@@ -2,6 +2,7 @@ package com.test.pushnotification.contoller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.test.pushnotification.events.EventType;
+import com.test.pushnotification.events.UserEventTypes;
 import com.test.pushnotification.request.UserMessageRequest;
 import com.test.pushnotification.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -13,9 +14,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
+import java.util.List;
 import java.util.Set;
 
 @RestController
+@RequestMapping("/user")
 @CrossOrigin("*")
 @Tag(name = "User Events")
 @Slf4j
@@ -24,7 +27,7 @@ public class UserController {
     private UserService userService;
 
     // keep it get to be able to test it from browser
-    @GetMapping(value = "/connect/user/{username}" , produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    @GetMapping(value = "/connect/{username}" , produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     @Operation(summary = "Create new user and establish a connection")
     public SseEmitter createNewUser(@PathVariable("username") String username) throws JsonProcessingException {
         System.out.println("new joiner:"+username);
@@ -34,8 +37,6 @@ public class UserController {
     @PostMapping("/message")
     @Operation(summary = "Send a message")
     public ResponseEntity<Integer> createNewMessage(@RequestBody UserMessageRequest request){
-
-        System.out.println(request.getFrom()+": "+request.getMessage());
         userService.newMessage(request);
         return ResponseEntity.ok(200);
     }
@@ -47,18 +48,17 @@ public class UserController {
         return ResponseEntity.ok(200);
     }
 
-
     @PostMapping("/subscribe")
     @Operation(summary = "Subscribe an event")
-    public ResponseEntity<Integer> subscribeUser(@RequestParam("username") String username, @RequestParam("events")Set<EventType> events){
-        userService.subscribe(username,events);
+    public ResponseEntity<Integer> subscribeUser(@RequestParam("username") String username, @RequestParam("events") UserEventTypes event){
+        userService.subscribe(username,event);
         return ResponseEntity.ok(200);
     }
 
     @PostMapping("/unsubscribe")
     @Operation(summary = "Unsubscribe an event")
-    public ResponseEntity<Integer> unsubscribeUser(@RequestParam("username") String username, @RequestParam("events")Set<EventType> events){
-        userService.unsubscribe(username,events);
+    public ResponseEntity<Integer> unsubscribeUser(@RequestParam("username") String username, @RequestParam("events") UserEventTypes event){
+        userService.unsubscribe(username,event);
         return ResponseEntity.ok(200);
     }
 

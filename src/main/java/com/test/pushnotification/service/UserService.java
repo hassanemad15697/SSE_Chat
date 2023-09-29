@@ -7,10 +7,11 @@ import com.test.pushnotification.events.ServerEventTypes;
 import com.test.pushnotification.model.User;
 import com.test.pushnotification.request.UserMessageRequest;
 import com.test.pushnotification.request.ServerMessageRequest;
-import com.test.pushnotification.singleton.AllUsers;
+import com.test.pushnotification.singleton.ServerManager;
 import com.test.pushnotification.singleton.ObjectMapperSingleton;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Set;
 
 @Service
@@ -23,16 +24,14 @@ public class UserService {
 
     public User addUser(String username) {
         //check if the user not exists in the list
-        System.out.println("check if the user not exists in the list");
-        if (AllUsers.hasUser(username)) {
+        if (ServerManager.hasUser(username)) {
             // TODO: throw an exception
             return null;
         }
         //add the user to the list
-        System.out.println("add the user to the list");
-        User user = AllUsers.addUserByUsername(username);
+        User user = ServerManager.addUserByUsername(username);
         notification.serverNotification(new ServerMessageRequest(ServerEventTypes.newJoiner,username+" joined!"));
-        notification.serverNotification(new ServerMessageRequest(ServerEventTypes.updatedUsersAndGroupsList,AllUsers.sendListsToNewUser()));
+        notification.serverNotification(new ServerMessageRequest(ServerEventTypes.updatedUsersAndGroupsList, ServerManager.sendListsToNewUser()));
         return user;
     }
 
@@ -44,27 +43,25 @@ public class UserService {
         getCurrentUser(username).getSseEmitter().complete();;
     }
 
-    public void subscribe(String username, Set<EventType> events) {
-        AllUsers.subscribe(username, events);
+    public void subscribe(String username, EventType event) {
+        ServerManager.subscribe(username, event);
     }
 
-    public void unsubscribe(String username, Set<EventType> events) {
-        AllUsers.unsubscribe(username, events);
+    public void unsubscribe(String username, EventType event) {
+        ServerManager.unsubscribe(username, event);
     }
 
     public void unsubscribeFromAllEvents(String username) {
-        AllUsers.unsubscribeFromAllEvents(username);
+        ServerManager.unsubscribeFromAllEvents(username);
     }
 
     private User getCurrentUser(String username) {
-        return AllUsers.getUserByUsername(username);
+        return ServerManager.getUserByUsername(username);
     }
 
     public static void disconnected(String username) {
-        AllUsers.deleteUserByUsername(username);
-        System.out.println("T4");
-        notification.serverNotification(new ServerMessageRequest(ServerEventTypes.updatedUsersAndGroupsList,AllUsers.sendListsToNewUser()));
-        System.out.println("T3");
+        ServerManager.deleteUserByUsername(username);
+        notification.serverNotification(new ServerMessageRequest(ServerEventTypes.updatedUsersAndGroupsList, ServerManager.sendListsToNewUser()));
         notification.serverNotification(new ServerMessageRequest(ServerEventTypes.userLeft,username+" left!"));
     }
 }

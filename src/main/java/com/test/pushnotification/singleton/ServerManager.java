@@ -8,13 +8,13 @@ import com.test.pushnotification.events.UserEventTypes;
 import com.test.pushnotification.model.User;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
-public class AllUsers {
+public class ServerManager {
     private static final ObjectMapper objectMapper = ObjectMapperSingleton.getInstance();
 
     private static Map<String, User> allUsers = new ConcurrentHashMap<>();
@@ -27,7 +27,7 @@ public class AllUsers {
     }
 
     // Private constructor to prevent instantiation from other classes
-    private AllUsers() {
+    private ServerManager() {
     }
 
     public static User getUserByUsername(String username) {
@@ -45,15 +45,27 @@ public class AllUsers {
     public static User addUserByUsername(String username) {
         User newUser = new User(username);
         allUsers.put(username, newUser);
-        subscribe(username, Set.of(ServerEventTypes.values()));
-        subscribe(username, Set.of(UserEventTypes.newMessage));
-        System.out.println(allUsers.keySet().toString());
+        subscribeAll(username, Set.of(ServerEventTypes.values()));
+        subscribe(username, UserEventTypes.newMessage);
         return newUser;
     }
 
+    private static void subscribeAll(String username, Set<ServerEventTypes> events) {
+        if (!hasUser(username)) {
+            //TODO: throw an exception
+            return;
+        }
+        events.forEach(event -> {
+            Set<String> eventSubscribers = getAllUsernamesSubscribingAnEvent(event);
+            if (eventSubscribers.contains(username)) {
+                //TODO: throw an exception
+                return;
+            }
+            eventSubscribers.add(username);
+        });
+    }
+
     public static Boolean hasUser(String username) {
-        System.out.println("hasUser");
-        System.out.println(allUsers.keySet());
         return allUsers.containsKey(username);
     }
 
@@ -66,28 +78,22 @@ public class AllUsers {
     }
 
 
-    public static void subscribe(String username, Set<EventType> events) {
-        System.out.println("T1");
-        System.out.println(hasUser(username));
+    public static void subscribe(String username, EventType event) {
         if (!hasUser(username)) {
             //TODO: throw an exception
             return;
         }
-        System.out.println("T2");
-        events.forEach(event -> {
-            Set<String> eventSubscribers = getAllUsernamesToEvent(event);
-
+            Set<String> eventSubscribers = getAllUsernamesSubscribingAnEvent(event);
             if (eventSubscribers.contains(username)) {
                 //TODO: throw an exception
                 return;
             }
             eventSubscribers.add(username);
-        });
-        System.out.println(allSubscribers.keySet().toString());
     }
 
-    private static Set<String> getAllUsernamesToEvent(EventType event) {
+    private static Set<String> getAllUsernamesSubscribingAnEvent(EventType event) {
         Set<String> subscribers = allSubscribers.get(event);
+        // this check is important
         if(subscribers == null){
             allSubscribers.put(event,new HashSet<>());
             subscribers = allSubscribers.get(event);
@@ -95,19 +101,17 @@ public class AllUsers {
         return subscribers;
     }
 
-    public static void unsubscribe(String username, Set<EventType> events) {
+    public static void unsubscribe(String username, EventType event) {
         if (!hasUser(username)) {
             //TODO: throw an exception
             return;
         }
-        events.stream().forEach(event -> {
-            Set<String> eventSubscribers = allSubscribers.get(event);
+            Set<String> eventSubscribers = getAllUsernamesSubscribingAnEvent(event);
             if (eventSubscribers.contains(username)) {
                 //TODO: throw an exception
                 return;
             }
             eventSubscribers.remove(username);
-        });
     }
 
     public static void unsubscribeFromAllEvents(String username) {
@@ -123,17 +127,15 @@ public class AllUsers {
         if(subscribers == null){
             allSubscribers.put(eventType,Set.of());
         }
-        return subscribers.stream().map(AllUsers::getUserByUsername).collect(Collectors.toSet());
+        return subscribers.stream().map(ServerManager::getUserByUsername).collect(Collectors.toSet());
     }
 
     public static String sendListsToNewUser() {
-        Set<String> userList = AllUsers.getAllUsernames();
+        Set<String> userList = ServerManager.getAllUsernames();
         //List<String> groupList = getAllGroupsNames();
 
         try {
             String usersJson = objectMapper.writeValueAsString(userList);
-            System.out.println(usersJson);
-
 //            String groupsJson = objectMapper.writeValueAsString(groupList);
 //            System.out.println(groupsJson);
 
