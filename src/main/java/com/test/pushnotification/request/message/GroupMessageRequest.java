@@ -1,6 +1,6 @@
 package com.test.pushnotification.request.message;
 
-import com.test.pushnotification.events.GroupEventTypes;
+import com.test.pushnotification.events.GroupEventType;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
@@ -13,7 +13,7 @@ import java.io.Serializable;
 public class GroupMessageRequest implements Message, Serializable {
     private String from;
     private String groupName;
-    private GroupEventTypes eventType;
+    private GroupEventType eventType;
     private String message;
 //    private LocalDateTime when;
 

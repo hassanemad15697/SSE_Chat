@@ -21,20 +21,20 @@ public class ServerController {
 
     @PostMapping("/subscribe")
     @Operation(summary = "Subscribe an event")
-    public ResponseEntity<Integer> subscribeUser(@RequestParam("username") String username, @RequestParam("events") ServerEventType event) {
+    public ResponseEntity<Integer> subscribeUser(@RequestParam("username") String username, @RequestParam("event") ServerEventType event) {
         serverService.subscribe(username, event);
         return ResponseEntity.ok(200);
     }
 
     @PostMapping("/unsubscribe")
     @Operation(summary = "Unsubscribe an event")
-    public ResponseEntity<Integer> unsubscribeUser(@RequestParam("username") String username, @RequestParam("events") ServerEventType event) {
+    public ResponseEntity<Integer> unsubscribeUser(@RequestParam("username") String username, @RequestParam("event") ServerEventType event) {
         serverService.unsubscribe(username, event);
         return ResponseEntity.ok(200);
     }
 
     @PostMapping("/unsubscribe/all")
-    @Operation(summary = "Unsubscribe an event")
+    @Operation(summary = "Unsubscribe all events")
     public ResponseEntity<Integer> unsubscribeUserFromAllEvents(@RequestParam("username") String username) {
         serverService.unsubscribeFromAllEvents(username);
         return ResponseEntity.ok(200);

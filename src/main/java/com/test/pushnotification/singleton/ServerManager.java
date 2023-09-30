@@ -10,6 +10,7 @@ import com.test.pushnotification.exception.ErrorCode;
 import com.test.pushnotification.model.Group;
 import com.test.pushnotification.model.User;
 import com.test.pushnotification.request.GroupRequest;
+import lombok.Getter;
 
 import java.util.HashSet;
 import java.util.Map;
@@ -22,12 +23,8 @@ public class ServerManager {
     private static final Map<String, Group> allGroups = new ConcurrentHashMap<>();
     private static final Map<String, User> allUsers = new ConcurrentHashMap<>();
     // map of events as a key and username as a value
+    @Getter
     private static final Map<EventType, Set<String>> allSubscribers = new ConcurrentHashMap<>();
-
-    // Static initializer to ensure thread-safe initialization
-    static {
-        // any initialization if needed
-    }
 
     // Private constructor to prevent instantiation from other classes
     private ServerManager() {
@@ -111,7 +108,7 @@ public class ServerManager {
         eventSubscribers.add(username);
     }
 
-    private static Set<String> getAllUsernamesSubscribingAnEvent(EventType event) {
+    public static Set<String> getAllUsernamesSubscribingAnEvent(EventType event) {
         Set<String> subscribers = allSubscribers.get(event);
         // this check is important
         if (subscribers == null) {
@@ -139,11 +136,12 @@ public class ServerManager {
         allSubscribers.forEach((eventType, eventSubscribers) -> eventSubscribers.remove(username));
     }
 
-    public static Set<User> getAllSubscribersToEvent(EventType eventType) {
+    public static Set<User> getAllSubscribersObjectsToEvent(EventType eventType) {
         Set<String> subscribers = allSubscribers.get(eventType);
         if (subscribers == null) {
             allSubscribers.put(eventType, Set.of());
         }
+        assert subscribers != null;
         return subscribers.stream().map(ServerManager::getUserByUsername).collect(Collectors.toSet());
     }
 
@@ -167,4 +165,5 @@ public class ServerManager {
     public static void removeGroup(String groupName) {
         allGroups.remove(groupName);
     }
+
 }

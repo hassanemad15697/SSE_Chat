@@ -1,5 +1,7 @@
 package com.test.pushnotification.contoller;
 
+import com.test.pushnotification.events.GroupEventType;
+import com.test.pushnotification.events.UserEventTypes;
 import com.test.pushnotification.model.GroupPermissions;
 import com.test.pushnotification.request.GroupMemberRequest;
 import com.test.pushnotification.request.GroupRequest;
@@ -45,7 +47,7 @@ public class GroupController {
 
     @GetMapping(value = "/get")
     @Operation(summary = "Get group data")
-    public ResponseEntity<Response> addNewMember(@RequestParam String groupName) {
+    public ResponseEntity<Response> getGroup(@RequestParam String groupName) {
         return ResponseEntity.ok(groupService.getGroup(groupName));
     }
 
@@ -75,8 +77,33 @@ public class GroupController {
 
     @DeleteMapping(value = "/delete")
     @Operation(summary = "Delete group")
-    public ResponseEntity<Response> deleteGroup(@RequestParam String username, String groupName) {
-        return ResponseEntity.ok(groupService.deleteGroup(username, groupName));
+    public ResponseEntity<Response> deleteGroup(@RequestParam String groupName,@RequestParam String admin) {
+        return ResponseEntity.ok(groupService.deleteGroup(admin, groupName));
+    }
+    @PostMapping("/subscribe")
+    @Operation(summary = "Subscribe an event")
+    public ResponseEntity<Integer> subscribeUser(@RequestParam String groupName,@RequestParam("username") String username, @RequestParam("events") GroupEventType event) {
+        groupService.subscribe(groupName,username, event);
+        return ResponseEntity.ok(200);
     }
 
+    @PostMapping("/unsubscribe")
+    @Operation(summary = "Unsubscribe an event")
+    public ResponseEntity<Integer> unsubscribeUser(@RequestParam String groupName,@RequestParam("username") String username, @RequestParam("event") GroupEventType event) {
+        groupService.unsubscribe(groupName,username, event);
+        return ResponseEntity.ok(200);
+    }
+
+    @PostMapping("/unsubscribe/all")
+    @Operation(summary = "Unsubscribe all events")
+    public ResponseEntity<Integer> unsubscribeUserFromAllEvents(@RequestParam String groupName,@RequestParam("username") String username) {
+        groupService.unsubscribeFromAllEvents(groupName,username);
+        return ResponseEntity.ok(200);
+    }
+    @PostMapping("/subscribe/all")
+    @Operation(summary = "subscribe all events")
+    public ResponseEntity<Integer> subscribeUserFromAllEvents(@RequestParam String groupName,@RequestParam("username") String username) {
+        groupService.subscribeFromAllEvents(groupName,username);
+        return ResponseEntity.ok(200);
+    }
 }

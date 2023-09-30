@@ -1,7 +1,9 @@
 package com.test.pushnotification.service;
 
 import com.test.pushnotification.Notifications.Notification;
+import com.test.pushnotification.events.GroupEventType;
 import com.test.pushnotification.events.ServerEventType;
+import com.test.pushnotification.events.UserEventTypes;
 import com.test.pushnotification.exception.ChatException;
 import com.test.pushnotification.exception.ErrorCode;
 import com.test.pushnotification.model.Group;
@@ -41,7 +43,7 @@ public class GroupService {
     public Response createNewGroup(GroupRequest request) {
         //check if there is another group with the same name?
         if (hasGroup(request.getGroupName())) {
-            throw new ChatException(ErrorCode.GROUP_NOT_EXISTS, "There is another group with the same name.");
+            throw new ChatException(ErrorCode.GROUP_EXISTS, "There is another group with the same name.");
         }
         //add the group to the list
         Group group = ServerManager.addGroup(request);
@@ -103,4 +105,26 @@ public class GroupService {
         return response;
     }
 
+    public void subscribeFromAllEvents(String groupName, String member) {
+        isExistGroup(groupName);
+        Group group = ServerManager.getGroupByName(groupName);
+        group.subscribeAllEvents(member);
+    }
+
+    public void unsubscribeFromAllEvents(String groupName, String member) {
+        isExistGroup(groupName);
+        Group group = ServerManager.getGroupByName(groupName);
+        group.unsubscribeAllEvents(member);
+    }
+    public void subscribe(String groupName, String username, GroupEventType event) {
+        isExistGroup(groupName);
+        Group group = ServerManager.getGroupByName(groupName);
+        group.subscribeEvent(username,event);
+    }
+
+    public void unsubscribe(String groupName, String username, GroupEventType event) {
+        isExistGroup(groupName);
+        Group group = ServerManager.getGroupByName(groupName);
+        group.unsubscribeEvent(username,event);
+    }
 }
