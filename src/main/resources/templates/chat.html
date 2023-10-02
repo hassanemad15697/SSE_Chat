@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register</title>
+</head>
+
+<body>
+
+<div class="registration-section">
+    <h2>Register</h2>
+    <input type="text" id="registerUsername" placeholder="Enter Username">
+    <button onclick="registerUser()">Register</button>
+</div>
+
+<script>
+    const BASE_URL = "http://localhost:8088/";
+
+    function registerUser() {
+        const username = document.getElementById('registerUsername').value;
+
+        fetch(BASE_URL + 'user/connect/' + username, {
+            method: 'GET',
+        })
+            .then(response => response.json())
+            .then(data => {
+                // Handle the response and redirect to the main chat page
+                if (data.eventType === "newJoiner") {
+                    alert(data.message);
+                    // Redirect to the main chat page
+                    window.location.href = "main-chat.html";
+                }
+            })
+            .catch(error => {
+                console.error('Error during registration:', error);
+                alert('Error during registration. Please try again.');
+            });
+    }
+
+</script>
+</body>
+
+</html>
