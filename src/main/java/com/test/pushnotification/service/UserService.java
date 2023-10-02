@@ -7,6 +7,7 @@ import com.test.pushnotification.events.ServerEventType;
 import com.test.pushnotification.exception.ChatException;
 import com.test.pushnotification.exception.ErrorCode;
 import com.test.pushnotification.model.User;
+import com.test.pushnotification.request.UserLoginRequest;
 import com.test.pushnotification.request.message.ServerMessageRequest;
 import com.test.pushnotification.request.message.UserMessageRequest;
 import com.test.pushnotification.response.Response;
@@ -38,14 +39,14 @@ public class UserService {
         return ServerMessageRequest.builder().eventType(eventTypes).message(message).build();
     }
 
-    public User addUser(String username) {
+    public User addUser(UserLoginRequest request) {
         //check if the user not exists in the list
-        if (ServerManager.hasUser(username)) {
+        if (ServerManager.hasUser(request.getUsername())) {
             throw new ChatException(ErrorCode.USER_ALREADY_EXISTS, "other user with this name already exists");
         }
         //add the user to the list
-        User user = ServerManager.addUserByUsername(username);
-        notification.serverNotification(serverMessageRequestBuilder(ServerEventType.newJoiner, username + " joined!"));
+        User user = ServerManager.addUserByUsername(request.getUsername());
+        notification.serverNotification(serverMessageRequestBuilder(ServerEventType.newJoiner, request.getUsername() + " joined!"));
         notification.serverNotification(serverMessageRequestBuilder(ServerEventType.updatedUsersAndGroupsList, ServerManager.updatedLists()));
         return user;
     }

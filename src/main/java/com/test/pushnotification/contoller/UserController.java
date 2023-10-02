@@ -2,6 +2,7 @@ package com.test.pushnotification.contoller;
 
 import com.test.pushnotification.events.EventType;
 import com.test.pushnotification.events.UserEventTypes;
+import com.test.pushnotification.request.UserLoginRequest;
 import com.test.pushnotification.request.message.UserMessageRequest;
 import com.test.pushnotification.response.Response;
 import com.test.pushnotification.service.UserService;
@@ -26,11 +27,10 @@ public class UserController {
     @Autowired
     private UserService userService;
 
-    // keep it GET to be able to test it from browser
-    @GetMapping(value = "/connect/{username}")
+    @PostMapping(value = "/connect")
     @Operation(summary = "Create new user and establish a connection")
-    public SseEmitter createNewUser(@PathVariable("username") String username) {
-        return userService.addUser(username).getSseEmitter();
+    public SseEmitter createNewUser(@RequestBody UserLoginRequest request) {
+        return userService.addUser(request).getSseEmitter();
     }
 
     @GetMapping(value = "/get/{username}")
