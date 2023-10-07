@@ -10,9 +10,11 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.util.Map;
@@ -27,10 +29,11 @@ public class UserController {
     @Autowired
     private UserService userService;
 
-    @PostMapping(value = "/connect")
+    @GetMapping(value = "/connect/{username}")
     @Operation(summary = "Create new user and establish a connection")
-    public SseEmitter createNewUser(@RequestBody UserLoginRequest request) {
-        return userService.addUser(request).getSseEmitter();
+//    public SseEmitter createNewUser(@RequestBody UserLoginRequest request) {
+    public SseEmitter createNewUser(@PathVariable String username) {
+        return userService.addUser(username).getSseEmitter();
     }
 
     @GetMapping(value = "/get/{username}")
@@ -45,11 +48,15 @@ public class UserController {
         return userService.getAllUser();
     }
 
-    @PostMapping("/message")
+    @PostMapping(value = "/message")
     @Operation(summary = "Send a message")
-    public ResponseEntity<Integer> createNewMessage(@RequestBody UserMessageRequest request) {
-        userService.newMessage(request);
-        return ResponseEntity.ok(200);
+    public ResponseEntity<String> createNewMessage(@RequestBody UserMessageRequest request) {
+        try {
+            userService.newMessage(request);
+            return ResponseEntity.ok("Message sent successfully.");
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+        }
     }
 
     @DeleteMapping("/delete")
