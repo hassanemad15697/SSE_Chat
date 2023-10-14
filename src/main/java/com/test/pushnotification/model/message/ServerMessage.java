@@ -1,20 +1,15 @@
-package com.test.pushnotification.request.message;
+package com.test.pushnotification.model.message;
 
 import com.test.pushnotification.events.ServerEventType;
 import lombok.*;
 
 import java.io.Serializable;
-
-
 @Setter
 @Getter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ServerMessageRequest implements  Serializable {
+public class ServerMessage implements Message, Serializable {
     private ServerEventType eventType;
     private Object message;
-//    private LocalDateTime when;
-
 }
-

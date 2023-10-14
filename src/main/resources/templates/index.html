@@ -1,8 +1,35 @@
+<!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>Swagger Endpoints</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Connect to Chat</title>
 </head>
-<body >
-<h1> Hi, This's Hassan. </h1>
+<body>
+<div>
+    <label for="username">Enter Username:</label>
+    <input type="text" id="username">
+    <button onclick="connect()">Connect</button>
+</div>
+
+<script>
+    function connect() {
+        const username = document.getElementById('username').value;
+        fetch('http://localhost:8088/user/connect', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ username: username })
+        })
+            .then(response => {
+                if(response.ok) {
+                    window.location.href = 'chat.html?username=' + username;
+                } else {
+                    alert('Failed to connect');
+                }
+            });
+    }
+</script>
 </body>
 </html>

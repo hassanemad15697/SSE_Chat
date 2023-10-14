@@ -1,4 +1,4 @@
-package com.test.pushnotification.request.message;
+package com.test.pushnotification.model.message;
 
 import com.test.pushnotification.events.EventType;
 

@@ -10,7 +10,7 @@ import java.io.Serializable;
 @Setter
 @Getter
 @Builder
-public class GroupMessageRequest implements Message, Serializable {
+public class GroupMessageRequest implements  Serializable {
     private String from;
     private String groupName;
     private GroupEventType eventType;

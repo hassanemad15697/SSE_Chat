@@ -6,14 +6,17 @@ import com.test.pushnotification.events.ServerEventType;
 import com.test.pushnotification.events.UserEventTypes;
 import com.test.pushnotification.exception.ChatException;
 import com.test.pushnotification.exception.ErrorCode;
-import com.test.pushnotification.listeners.EventListener;
+import com.test.pushnotification.model.message.GroupMessage;
+import com.test.pushnotification.model.message.ServerMessage;
+import com.test.pushnotification.model.message.UserMessage;
 import com.test.pushnotification.request.message.GroupMessageRequest;
-import com.test.pushnotification.request.message.Message;
+import com.test.pushnotification.model.message.Message;
 import com.test.pushnotification.request.message.ServerMessageRequest;
 import com.test.pushnotification.request.message.UserMessageRequest;
 import com.test.pushnotification.singleton.ObjectMapperSingleton;
 import com.test.pushnotification.singleton.ServerManager;
 import lombok.Getter;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Set;
 
@@ -25,14 +28,13 @@ public class EventManager {
     }
 
     public void notify(Message eventMessage) {
-        EventListener listener;
 
         if (eventMessage.getEventType() instanceof ServerEventType) {
-            ServerMessageRequest message = (ServerMessageRequest) eventMessage;
+            ServerMessage message = (ServerMessage) eventMessage;
             ServerEventType eventType = message.getEventType();
             ServerManager.getAllSubscribersObjectsToEvent(eventType).forEach(user -> user.update(message));
         } else if (eventMessage.getEventType() instanceof UserEventTypes) {
-            UserMessageRequest message = (UserMessageRequest) eventMessage;
+            UserMessage message = (UserMessage) eventMessage;
             Set<String> allUsernamesSubscribingAnEvent = ServerManager.getAllUsernamesSubscribingAnEvent(message.getEventType());
             if(allUsernamesSubscribingAnEvent.contains(message.getTo())) {
                 ServerManager.getUserByUsername(message.getTo()).update(message);
@@ -40,10 +42,9 @@ public class EventManager {
                 throw new ChatException(ErrorCode.USER_NOT_ACCEPT_MESSAGES,"user "+message.getTo()+" doesn't accept any messages");
             }
         } else if (eventMessage.getEventType() instanceof GroupEventType) {
-            GroupMessageRequest message = (GroupMessageRequest) eventMessage;
+            GroupMessage message = (GroupMessage) eventMessage;
             ServerManager.getGroupByName(message.getGroupName()).update(message);
         }
     }
-
 
 }

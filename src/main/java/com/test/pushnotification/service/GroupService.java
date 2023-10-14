@@ -3,21 +3,25 @@ package com.test.pushnotification.service;
 import com.test.pushnotification.Notifications.Notification;
 import com.test.pushnotification.events.GroupEventType;
 import com.test.pushnotification.events.ServerEventType;
-import com.test.pushnotification.events.UserEventTypes;
 import com.test.pushnotification.exception.ChatException;
 import com.test.pushnotification.exception.ErrorCode;
 import com.test.pushnotification.model.Group;
 import com.test.pushnotification.model.GroupPermissions;
+import com.test.pushnotification.model.message.GroupMessage;
+import com.test.pushnotification.model.message.ServerMessage;
 import com.test.pushnotification.request.GroupMemberRequest;
 import com.test.pushnotification.request.GroupRequest;
 import com.test.pushnotification.request.message.GroupMessageRequest;
-import com.test.pushnotification.request.message.ServerMessageRequest;
 import com.test.pushnotification.response.GroupResponse;
 import com.test.pushnotification.response.Response;
 import com.test.pushnotification.singleton.ServerManager;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
+import java.util.Base64;
 
 @Service
 public class GroupService {
@@ -36,8 +40,8 @@ public class GroupService {
         return ServerManager.hasGroup(groupName);
     }
 
-    private static ServerMessageRequest serverMessageRequestBuilder(ServerEventType eventType, Object message) {
-        return ServerMessageRequest.builder().eventType(eventType).message(message).build();
+    private static ServerMessage serverMessageRequestBuilder(ServerEventType eventTypes, Object message) {
+        return ServerMessage.builder().eventType(eventTypes).message(message).build();
     }
 
     public Response createNewGroup(GroupRequest request) {
@@ -46,9 +50,9 @@ public class GroupService {
             throw new ChatException(ErrorCode.GROUP_EXISTS, "There is another group with the same name.");
         }
         //add the group to the list
-        Group group = ServerManager.addGroup(request);
+        Group newGroup = new Group(request.getCreatedBy(), request.getGroupName());
         notification.serverNotification(serverMessageRequestBuilder(ServerEventType.updatedUsersAndGroupsList, ServerManager.updatedLists()));
-        return modelMapper.map(group, GroupResponse.class);
+        return modelMapper.map(newGroup, GroupResponse.class);
     }
 
     public Response getGroup(String groupName) {
@@ -62,9 +66,15 @@ public class GroupService {
         return group.addMember(request.getAdminName(), request.getMemberName());
     }
 
-    public void sendMessage(GroupMessageRequest request) {
+    public void sendMessage(GroupMessageRequest request, MultipartFile file)  {
         isExistGroup(request.getGroupName());
-        notification.groupNotification(request);
+        GroupMessage message = modelMapper.map(request, GroupMessage.class);
+        try {
+            message.setFile(Base64.getEncoder().encodeToString(file.getBytes()));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        notification.groupNotification(message);
     }
 
     public Response removeMember(GroupMemberRequest request) {

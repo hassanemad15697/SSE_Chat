@@ -1,8 +1,7 @@
 package com.test.pushnotification.contoller;
 
-import com.test.pushnotification.events.EventType;
 import com.test.pushnotification.events.UserEventTypes;
-import com.test.pushnotification.request.UserLoginRequest;
+import com.test.pushnotification.model.User;
 import com.test.pushnotification.request.message.UserMessageRequest;
 import com.test.pushnotification.response.Response;
 import com.test.pushnotification.service.UserService;
@@ -11,14 +10,10 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
-import java.util.Map;
-import java.util.Set;
+import java.util.Collection;
 
 @RestController
 @RequestMapping("/user")
@@ -31,8 +26,9 @@ public class UserController {
 
     @GetMapping(value = "/connect/{username}")
     @Operation(summary = "Create new user and establish a connection")
+    //@PostMapping(value = "/connect")
 //    public SseEmitter createNewUser(@RequestBody UserLoginRequest request) {
-    public SseEmitter createNewUser(@PathVariable String username) {
+    public Object createNewUser(@PathVariable String username) {
         return userService.addUser(username).getSseEmitter();
     }
 
@@ -44,7 +40,7 @@ public class UserController {
 
     @GetMapping(value = "/get/all")
     @Operation(summary = "Get all user data")
-    public Map<EventType, Set<String>> getAllUser() {
+    public Collection<User> getAllUser() {
         return userService.getAllUser();
     }
 

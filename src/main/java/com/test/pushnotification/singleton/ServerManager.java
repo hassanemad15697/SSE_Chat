@@ -20,7 +20,9 @@ import java.util.stream.Collectors;
 
 public class ServerManager {
     private static final ObjectMapper objectMapper = ObjectMapperSingleton.getInstance();
+    @Getter
     private static final Map<String, Group> allGroups = new ConcurrentHashMap<>();
+    @Getter
     private static final Map<String, User> allUsers = new ConcurrentHashMap<>();
     // map of events as a key and username as a value
     @Getter
@@ -44,26 +46,9 @@ public class ServerManager {
         return allGroups.get(groupName);
     }
 
-    public static void deleteUserByUsername(String username) {
-        unsubscribeFromAllEvents(username);
-        allUsers.remove(username);
-    }
 
-    public static User addUserByUsername(String username) {
-        User newUser = new User(username);
-        allUsers.put(username, newUser);
-        subscribeAll(username, Set.of(ServerEventType.values()));
-        subscribe(username, UserEventTypes.newMessage);
-        return newUser;
-    }
 
-    public static Group addGroup(GroupRequest groupRequest) {
-        Group newGroup = new Group(groupRequest.getCreatedBy(), groupRequest.getGroupName());
-        allGroups.put(groupRequest.getGroupName(), newGroup);
-        return newGroup;
-    }
-
-    private static void subscribeAll(String username, Set<ServerEventType> events) {
+    public static void subscribeAll(String username, Set<ServerEventType> events) {
         if (!hasUser(username)) {
             throw new ChatException(ErrorCode.USER_NOT_EXISTS, "There is no user with name.");
         }
@@ -83,6 +68,7 @@ public class ServerManager {
     public static boolean hasGroup(String groupName) {
         return allGroups.containsKey(groupName);
     }
+
 
     public static Set<String> getAllUsernames() {
         return allUsers.keySet();

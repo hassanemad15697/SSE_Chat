@@ -1,10 +1,10 @@
 package com.test.pushnotification.events;
 
 public enum GroupEventType implements EventType {
-    newMessage,
+    newGroupMessage,
     groupCreated,
     groupDeleted,
     memberJoined,
     memberLeft,
-    memberWithNewRole
+    memberWithoutNewRole, memberWithNewRole
 }

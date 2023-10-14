@@ -1,27 +1,27 @@
 package com.test.pushnotification.request.message;
 
 import com.test.pushnotification.events.UserEventTypes;
+import com.test.pushnotification.model.message.Message;
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.lang.Nullable;
+import org.springframework.web.multipart.MultipartFile;
 
+import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 
 
 @Setter
 @Getter
-public class UserMessageRequest implements Serializable, Message {
+public class UserMessageRequest implements Message, Serializable {
+    @NotNull
     private String from;
+    @NotNull
     private String to;
+    @NotNull
     private UserEventTypes eventType;
+    @NotNull
     private String message;
-//    private LocalDateTime when;
-
-    public UserMessageRequest(String from, String to, UserEventTypes eventType, String message) {
-        this.from = from;
-        this.to = to;
-        this.eventType = eventType;
-        this.message = message;
-//        this.when= LocalDateTime.now();
-    }
+    private String file;
 }
 

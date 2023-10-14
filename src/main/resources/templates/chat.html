@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat</title>
+</head>
+<body>
+<div>
+    <label for="recipient">Recipient:</label>
+    <input type="text" id="recipient">
+
+    <label for="message">Message:</label>
+    <textarea id="message"></textarea>
+
+    <label for="imageUpload">Image:</label>
+    <input type="file" id="imageUpload">
+
+    <button onclick="sendMessage()">Send</button>
+</div>
+
+<div id="chatBox">
+    <!-- Messages will appear here -->
+</div>
+
+<script>
+    const params = new URLSearchParams(window.location.search);
+    const username = params.get('username');
+
+    if (!username) {
+        window.location.href = 'index.html';
+    }
+
+    const eventSource = new EventSource('http://localhost:8088/user/listen/' + username);
+    eventSource.onmessage = function(event) {
+        const data = JSON.parse(event.data);
+        const chatBox = document.getElementById('chatBox');
+
+        const messageDiv = document.createElement('div');
+        messageDiv.textContent = data.from + ': ' + data.message;
+
+        if (data.file) {
+            const img = document.createElement('img');
+            img.src = 'data:image/png;base64,' + data.file;
+            messageDiv.appendChild(img);
+        }
+
+        chatBox.appendChild(messageDiv);
+    };
+
+    function sendMessage() {
+        const recipient = document.getElementById('recipient').value;
+        const message = document.getElementById('message').value;
+        const imageUpload = document.getElementById('imageUpload').files[0];
+
+        let payload = {
+            from: username,
+            to: recipient,
+            eventType: 'newMessage',
+            message: message
+        };
+
+        if (imageUpload) {
+            const reader = new FileReader();
+            reader.onloadend = function() {
+                payload.file = reader.result.replace("data:", "").replace(/^.+,/, "");
+                sendPayload(payload);
+            }
+            reader.readAsDataURL(imageUpload);
+        } else {
+            sendPayload(payload);
+        }
+    }
+
+    function sendPayload(payload) {
+        fetch('http://localhost:8088/chat/send-message', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(payload)
+        })
+            .then(response => {
+                if (!response.ok) {
+                    alert('Failed to send message');
+                }
+            });
+    }
+</script>
+</body>
+</html>
