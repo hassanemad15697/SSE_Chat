@@ -29,7 +29,7 @@ public class UserService {
     private ModelMapper modelMapper;
 
     public static void disconnected(String username) {
-        getUserObject(username).delete();
+        getUserObject(username).setIsActive(false);
         notification.serverNotification(serverMessageRequestBuilder(ServerEventType.userLeft, username + " left!"));
         notification.serverNotification(serverMessageRequestBuilder(ServerEventType.updatedUsersAndGroupsList, ServerManager.updatedLists()));
     }
@@ -77,7 +77,7 @@ public class UserService {
 //    }
 
     public void delete(String username) {
-        getUserObject(username).getSseEmitter().complete();
+        getUserObject(username).delete();
     }
 
     public void subscribe(String username, EventType event) {
@@ -99,6 +99,21 @@ public class UserService {
 
     public Collection<User> getAllUser() {
         return ServerManager.getAllUsers().values();
-       // return modelMapper.map(allSubscribers,Map.class);
+    }
+
+    public Object connect(String username) {
+        User userObject = getUserObject(username);
+        userObject.setIsActive(true);
+        return userObject.getSseEmitter();
+    }
+
+    public void closeConnection(String username) {
+        User userObject = getUserObject(username);
+        userObject.setIsActive(false);
+        userObject.closeConnection();
+    }
+
+    public void sendOfflineMessages(String username) {
+        getUserObject(username).sendOfflineMessages();
     }
 }

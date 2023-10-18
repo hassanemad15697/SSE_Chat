@@ -3,24 +3,15 @@ package com.test.pushnotification.model;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.test.pushnotification.events.EventType;
-import com.test.pushnotification.events.ServerEventType;
-import com.test.pushnotification.events.UserEventTypes;
-import com.test.pushnotification.exception.ChatException;
-import com.test.pushnotification.exception.ErrorCode;
 import com.test.pushnotification.listeners.EventListener;
 import com.test.pushnotification.model.message.Message;
-import com.test.pushnotification.model.message.ServerMessage;
 import com.test.pushnotification.singleton.ServerManager;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.*;
 
 import static com.test.pushnotification.service.UserService.disconnected;
 
@@ -35,14 +26,15 @@ public class User implements EventListener {
     // SSE Emitter object to establish the connection between the client and the sever
     private SseEmitter sseEmitter;
     private Boolean isActive;
+    private Set<Message> messages;
 
     public User(String username) {
         this.username = username;
         sseEmitter = new SseEmitter(Long.MAX_VALUE);
-        isActive = true;
-
+        isActive = false;
         ServerManager.getAllUsers().put(username, this);
         userMetaData = new UserMetaData(username);
+        messages = new HashSet<>();
         this.getSseEmitter().onCompletion(() -> {
             disconnected(username);
         });
@@ -62,11 +54,10 @@ public class User implements EventListener {
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
-        //this.message.add(eventMessage);
         try {
             this.getSseEmitter().send(responseAsJson);
         } catch (IOException e) {
-            disconnected(username);
+            this.messages.add(eventMessage);
         }
     }
 
@@ -97,5 +88,15 @@ public class User implements EventListener {
 
     public void leaveGroup(String groupName) {
         this.getUserMetaData().leaveGroup(groupName);
+    }
+
+    public void sendOfflineMessages() {
+        messages.forEach(this::update);
+        messages.clear();
+    }
+
+    public void closeConnection() {
+        this.sseEmitter.complete();
+        this.sseEmitter= new SseEmitter(Long.MAX_VALUE);
     }
 }

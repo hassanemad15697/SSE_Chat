@@ -2,6 +2,7 @@ package com.test.pushnotification.contoller;
 
 import com.test.pushnotification.events.UserEventTypes;
 import com.test.pushnotification.model.User;
+import com.test.pushnotification.request.UserLoginRequest;
 import com.test.pushnotification.request.message.UserMessageRequest;
 import com.test.pushnotification.response.Response;
 import com.test.pushnotification.service.UserService;
@@ -24,14 +25,29 @@ public class UserController {
     @Autowired
     private UserService userService;
 
-    @GetMapping(value = "/connect/{username}")
-    @Operation(summary = "Create new user and establish a connection")
-    //@PostMapping(value = "/connect")
-//    public SseEmitter createNewUser(@RequestBody UserLoginRequest request) {
-    public Object createNewUser(@PathVariable String username) {
-        return userService.addUser(username).getSseEmitter();
+    @Operation(summary = "Create new user")
+    @PostMapping(value = "/add")
+    public User createNewUser(@RequestBody UserLoginRequest request) {
+        return userService.addUser(request.getUsername());
     }
 
+
+    @GetMapping(value = "/connect/{username}")
+    @Operation(summary = "Establish a connection")
+    public Object connectUser(@PathVariable("username") String username) {
+        return userService.connect(username);
+    }
+    @GetMapping(value = "/ready/{username}")
+    @Operation(summary = "Indicate client is ready to receive messages")
+    public ResponseEntity<Void> clientReady(@PathVariable("username") String username) {
+        userService.sendOfflineMessages(username);
+        return ResponseEntity.ok().build();
+    }
+    @GetMapping(value = "/disconnect/{username}")
+    @Operation(summary = "Close a connection")
+    public void closeUserConnection(@PathVariable("username") String username) {
+         userService.closeConnection(username);
+    }
     @GetMapping(value = "/get/{username}")
     @Operation(summary = "Get user data")
     public Response getUser(@PathVariable("username") String username) {
