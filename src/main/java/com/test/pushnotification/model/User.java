@@ -33,7 +33,7 @@ public class User implements EventListener {
         // Generate a random UUID
         this.id=UUID.randomUUID();
         this.username = username;
-        sseEmitter = new SseEmitter(Long.MAX_VALUE);
+//        sseEmitter = new SseEmitter(Long.MAX_VALUE);
         isActive = false;
         ServerManager.getAllUsers().put(username, this);
         userMetaData = new UserMetaData(username);

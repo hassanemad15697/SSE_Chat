@@ -17,6 +17,7 @@ import com.test.pushnotification.singleton.ServerManager;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.util.*;
 
@@ -102,11 +103,14 @@ public class UserService {
     }
 
     public Object connect(String username) {
+        SseEmitter emitter = new SseEmitter();
         User userObject = getUserObject(username);
-        if(userObject.getIsActive()){
-            closeConnection(username);
-        }
+//        if(userObject.getIsActive()){
+//            closeConnection(username);
+//        }
+        userObject.setSseEmitter(emitter);
         userObject.setIsActive(true);
+//        return userObject.getSseEmitter();
         return userObject.getSseEmitter();
     }
 
