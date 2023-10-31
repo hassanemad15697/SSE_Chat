@@ -103,6 +103,9 @@ public class UserService {
 
     public Object connect(String username) {
         User userObject = getUserObject(username);
+        if(userObject.getIsActive()){
+            closeConnection(username);
+        }
         userObject.setIsActive(true);
         return userObject.getSseEmitter();
     }

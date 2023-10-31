@@ -37,6 +37,8 @@ public class UserController {
     public Object connectUser(@PathVariable("username") String username) {
         return userService.connect(username);
     }
+
+
     @GetMapping(value = "/ready/{username}")
     @Operation(summary = "Indicate client is ready to receive messages")
     public ResponseEntity<Void> clientReady(@PathVariable("username") String username) {
