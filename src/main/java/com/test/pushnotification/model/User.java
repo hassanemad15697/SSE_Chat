@@ -50,7 +50,7 @@ public class User implements EventListener {
         try {
             responseAsJson = new ObjectMapper().writeValueAsString(eventMessage);
             if(getSseEmitter() != null){
-            sseEmitter.send(SseEmitter.event().name("message").data(responseAsJson));}
+            sseEmitter.send(responseAsJson);}
         } catch (JsonProcessingException e) {
             log.error("Failed to serialize message to JSON: " + e.getMessage());
         } catch (IOException e) {

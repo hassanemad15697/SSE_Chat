@@ -132,7 +132,7 @@ public class UserService {
             if (user.getSseEmitter() != null) {
                 try {
                     if (user.getIsActive()){
-                        user.getSseEmitter().send(SseEmitter.event().name("ping").data("Ping from the server to keep connection alive"));
+                        user.update(serverMessageRequestBuilder(ServerEventType.ping, "Ping from the server to keep connection alive"));
                         log.info("PING from server to user: {}",user.getUsername());
                     }
                 } catch (Exception e) {
