@@ -111,6 +111,7 @@ public class UserService {
         log.info("trying to connect {}", username);
         User userObject = getUserObject(username);
         notification.serverNotification(serverMessageRequestBuilder(ServerEventType.isOnline, username));
+        notification.serverNotification(serverMessageRequestBuilder(ServerEventType.updatedUsersAndGroupsList, ServerManager.updatedLists()));
         return userObject.connect();
     }
 
