@@ -19,6 +19,7 @@ import static com.test.pushnotification.service.UserService.disconnected;
 @Getter
 public class User implements EventListener {
 
+    private UUID id;
     // username (identifier)
     private String username;
     // save all the messages that this user has received
@@ -29,6 +30,8 @@ public class User implements EventListener {
     private Set<Message> messages;
 
     public User(String username) {
+        // Generate a random UUID
+        this.id=UUID.randomUUID();
         this.username = username;
         sseEmitter = new SseEmitter(Long.MAX_VALUE);
         isActive = false;
@@ -57,7 +60,7 @@ public class User implements EventListener {
         try {
             this.getSseEmitter().send(responseAsJson);
         } catch (IOException e) {
-            this.messages.add(eventMessage);
+           // this.messages.add(eventMessage);
         }
     }
 

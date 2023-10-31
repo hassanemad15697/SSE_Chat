@@ -21,6 +21,7 @@ import java.util.concurrent.ConcurrentHashMap;
 @Data
 @Getter
 public class Group implements EventListener {
+    private UUID id;
     private String groupName;
     // map contains usernames as a key and a list of permissions associated to this user
     private Map<String, Set<GroupPermissions>> groupUsersAndRoles;
@@ -29,6 +30,8 @@ public class Group implements EventListener {
     private String createdBy;
 
     public Group(String createdBy, String groupName) {
+        // Generate a random UUID
+        this.id=UUID.randomUUID();
         this.groupName = groupName;
         this.createdBy = createdBy;
         groupUsersAndRoles = new ConcurrentHashMap<>();

@@ -6,6 +6,7 @@ import lombok.*;
 
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Data
@@ -15,6 +16,7 @@ import java.util.concurrent.ConcurrentHashMap;
 @AllArgsConstructor
 @NoArgsConstructor
 public class GroupResponse implements Response {
+    private UUID id;
     private String groupName;
     // map contains username as a key and a list of permissions associated to this user
     private Map<String, Set<GroupPermissions>> groupUsersAndRoles;

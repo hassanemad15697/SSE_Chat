@@ -21,8 +21,6 @@ public class Notification {
 
     public void newMessageNotification(UserMessage newMessageRequestMessage) {
         notify(newMessageRequestMessage);
-
-        System.out.println("sent!!!");
     }
 
 

@@ -6,5 +6,6 @@ public enum GroupEventType implements EventType {
     groupDeleted,
     memberJoined,
     memberLeft,
-    memberWithoutNewRole, memberWithNewRole
+    memberWithoutNewRole,
+    memberWithNewRole
 }
