@@ -111,6 +111,7 @@ public class UserService {
         log.info("trying to connect {}", username);
         User userObject = getUserObject(username);
         notification.serverNotification(serverMessageRequestBuilder(ServerEventType.isOnline, username));
+        log.info("send the updated list to user: {}", username);
         notification.serverNotification(serverMessageRequestBuilder(ServerEventType.updatedUsersAndGroupsList, ServerManager.updatedLists()));
         return userObject.connect();
     }
