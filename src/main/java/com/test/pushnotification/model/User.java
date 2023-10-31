@@ -97,6 +97,7 @@ public class User implements EventListener {
         if(getSseEmitter() == null){
             setSseEmitter(new SseEmitter(Long.MAX_VALUE));
         }
+        this.setIsActive(true);
         return this.getSseEmitter();
     }
 

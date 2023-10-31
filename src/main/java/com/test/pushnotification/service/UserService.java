@@ -125,16 +125,17 @@ public class UserService {
     }
 
 
-    @Async
-    @Scheduled(fixedRate = 20000) // Send data every 10 seconds
+
+    @Scheduled(fixedRate = 20000) // Send data every 20 seconds
     public void sendPing() {
         ServerManager.getAllUsersObjects().forEach(user -> {
-            log.info("PING from server to user: {}",user.getUsername());
             if (user.getSseEmitter() != null) {
                 try {
                     user.getSseEmitter().send(SseEmitter.event().name("ping").data("Ping from the server to keep connection alive"));
+                    log.info("PING from server to user: {}",user.getUsername());
                 } catch (Exception e) {
                     // Handle exceptions or client disconnects
+                    log.info("cannot reach user: {} too kep the connection alive",user.getUsername());
                     user.closeConnection();
                 }
             }
