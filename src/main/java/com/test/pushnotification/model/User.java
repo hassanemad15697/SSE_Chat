@@ -95,8 +95,10 @@ public class User implements EventListener {
 
     public SseEmitter connect() {
         if(this.sseEmitter != null){
+            log.info("complete the existing connect");
             this.getSseEmitter().complete();
         }
+        log.info("create a new  sse emitter");
         this.setSseEmitter(new SseEmitter(Long.MAX_VALUE));
 
         this.getSseEmitter().onCompletion(() -> {
@@ -108,6 +110,8 @@ public class User implements EventListener {
         this.getSseEmitter().onError(throwable -> {
             disconnected(username);
         });
+
+        log.info("return the emitter");
         return this.getSseEmitter();
     }
     public void closeConnection() {

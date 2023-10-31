@@ -14,6 +14,7 @@ import com.test.pushnotification.response.Response;
 import com.test.pushnotification.response.UserResponse;
 import com.test.pushnotification.singleton.ObjectMapperSingleton;
 import com.test.pushnotification.singleton.ServerManager;
+import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -22,6 +23,7 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import java.util.*;
 
 @Service
+@Slf4j
 public class UserService {
 
     private static final Notification notification = new Notification();
@@ -103,6 +105,7 @@ public class UserService {
     }
 
     public SseEmitter connect(String username) {
+        log.info("trying to connect {}", username);
         return getUserObject(username).connect();
     }
 
