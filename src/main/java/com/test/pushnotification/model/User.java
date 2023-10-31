@@ -9,6 +9,7 @@ import com.test.pushnotification.singleton.ServerManager;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.io.IOException;
@@ -106,29 +107,21 @@ public class User implements EventListener {
             disconnected(username);
         });
 
-        // Start a thread to send periodic "ping" messages to keep the connection alive
-        Runnable keepAliveTask = () -> {
-            while (true) {
-                try {
-                    // Send a "ping" message to the client
-                    String pingMessage = "Connection kept alive for user: " + username;
-                    this.getSseEmitter().send(SseEmitter.event().name("ping").data(pingMessage));
-                    Thread.sleep(19000); // Send a "ping" every 15 seconds
-                } catch (Exception e) {
-                    // Handle exceptions or client disconnects
-                    closeConnection();
-                    break;
-                }
-            }
-        };
-
-        // Start the keep-alive task in a separate thread
-        new Thread(keepAliveTask).start();
-
         log.info("Returning the SSE emitter for user: " + username);
         return this.getSseEmitter();
     }
-
+    @Scheduled(fixedRate = 20000) // Send "ping" every 20 seconds
+    public void sendPing() {
+        if (sseEmitter != null) {
+            try {
+                String pingMessage = "Ping from the server"; // Customize your ping message
+                sseEmitter.send(SseEmitter.event().name("ping").data(pingMessage));
+            } catch (Exception e) {
+                // Handle exceptions or client disconnects
+                closeConnection();
+            }
+        }
+    }
     public void closeConnection() {
         this.getSseEmitter().complete();
     }
