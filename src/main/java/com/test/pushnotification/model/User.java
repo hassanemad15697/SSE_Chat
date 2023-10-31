@@ -9,13 +9,12 @@ import com.test.pushnotification.singleton.ServerManager;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.scheduling.annotation.Async;
-import org.springframework.scheduling.annotation.EnableAsync;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.UUID;
 
 import static com.test.pushnotification.service.UserService.disconnected;
 
@@ -36,7 +35,7 @@ public class User implements EventListener {
 
     public User(String username) {
         // Generate a random UUID
-        this.id=UUID.randomUUID();
+        this.id = UUID.randomUUID();
         this.username = username;
         isActive = false;
         ServerManager.getAllUsers().put(username, this);
@@ -49,22 +48,23 @@ public class User implements EventListener {
         String responseAsJson;
         try {
             responseAsJson = new ObjectMapper().writeValueAsString(eventMessage);
-            if(getSseEmitter() != null){
-            sseEmitter.send(responseAsJson);}
+            if (getSseEmitter() != null) {
+                sseEmitter.send(responseAsJson);
+            }
         } catch (JsonProcessingException e) {
             log.error("Failed to serialize message to JSON: " + e.getMessage());
         } catch (IOException e) {
-            log.error("Failed to send message to the client {} : {}" ,username, e.getMessage());
+            log.error("Failed to send message to the client {} : {}", username, e.getMessage());
             closeConnection();
         }
     }
 
     public void delete() {
         this.getUserMetaData().delete();
-        this.userMetaData=null;
+        this.userMetaData = null;
         ServerManager.getAllUsers().remove(username);
-        this.username=null;
-        this.sseEmitter=null;
+        this.username = null;
+        this.sseEmitter = null;
         System.gc();
     }
 
@@ -95,7 +95,7 @@ public class User implements EventListener {
 
     public SseEmitter connect() {
         log.info("Returning the SSE emitter for user: " + username);
-        if(getSseEmitter() == null){
+        if (getSseEmitter() == null) {
             setSseEmitter(new SseEmitter(Long.MAX_VALUE));
         }
         this.setIsActive(true);
@@ -116,7 +116,7 @@ public class User implements EventListener {
     }
 
     public void closeConnection() {
-        log.info("cannot reach user: {} too kep the connection alive",getUsername());
+        log.info("cannot reach user: {} too kep the connection alive", getUsername());
         this.getSseEmitter().complete();
         setSseEmitter(new SseEmitter(Long.MAX_VALUE));
     }

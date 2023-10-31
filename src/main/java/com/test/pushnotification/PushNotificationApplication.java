@@ -10,8 +10,8 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 @EnableScheduling
 public class PushNotificationApplication {
 
-	public static void main(String[] args) {
-		SpringApplication.run(PushNotificationApplication.class, args);
-	}
+    public static void main(String[] args) {
+        SpringApplication.run(PushNotificationApplication.class, args);
+    }
 
 }

@@ -17,13 +17,10 @@ import com.test.pushnotification.singleton.ServerManager;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Async;
-import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
-import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
-import java.util.*;
+import java.util.Collection;
 
 @Service
 @Slf4j
@@ -44,6 +41,10 @@ public class UserService {
         return ServerMessage.builder().eventType(eventTypes).message(message).build();
     }
 
+    private static User getUserObject(String username) {
+        return ServerManager.getUserByUsername(username);
+    }
+
     public User addUser(String username) {
         //check if the user not exists in the list
         if (ServerManager.hasUser(username)) {
@@ -60,19 +61,6 @@ public class UserService {
         return modelMapper.map(getUserObject(username), UserResponse.class);
     }
 
-    public void newMessage(UserMessageRequest request) {
-
-        UserMessage message = modelMapper.map(request, UserMessage.class);
-
-//        System.out.println(request.getFile());
-//        if (request.getFile() != null) {
-            //String base64Image = convertImageToBase64(request.getFile());
-//            message.setFile(base64Image);
-//        }
-
-        notification.newMessageNotification(message);
-    }
-
 //    private String convertImageToBase64(MultipartFile file) {
 //        try {
 //            byte[] bytes = file.getBytes();
@@ -81,6 +69,19 @@ public class UserService {
 //            throw new RuntimeException("Failed to encode the image.", e);
 //        }
 //    }
+
+    public void newMessage(UserMessageRequest request) {
+
+        UserMessage message = modelMapper.map(request, UserMessage.class);
+
+//        System.out.println(request.getFile());
+//        if (request.getFile() != null) {
+        //String base64Image = convertImageToBase64(request.getFile());
+//            message.setFile(base64Image);
+//        }
+
+        notification.newMessageNotification(message);
+    }
 
     public void delete(String username) {
         getUserObject(username).delete();
@@ -99,11 +100,6 @@ public class UserService {
     public void unsubscribeFromAllEvents(String username) {
         getUserObject(username).unsubscribeFromAllEvents();
     }
-
-    private static User getUserObject(String username) {
-        return ServerManager.getUserByUsername(username);
-    }
-
 
     public Collection<User> getAllUser() {
         return ServerManager.getAllUsers().values();
@@ -130,19 +126,18 @@ public class UserService {
     }
 
 
-
     @Scheduled(fixedRate = 20000) // Send data every 20 seconds
     public void sendPing() {
         ServerManager.getAllUsersObjects().forEach(user -> {
             if (user.getSseEmitter() != null) {
                 try {
-                    if (user.getIsActive()){
+                    if (user.getIsActive()) {
                         user.update(serverMessageRequestBuilder(ServerEventType.ping, "KeepAlive"));
-                        log.info("PING from server to user: {}",user.getUsername());
+                        log.info("PING from server to user: {}", user.getUsername());
                     }
                 } catch (Exception e) {
                     // Handle exceptions or client disconnects
-                    log.info("cannot reach user: {} too kep the connection alive",user.getUsername());
+                    log.info("cannot reach user: {} too kep the connection alive", user.getUsername());
                     user.closeConnection();
                 }
             }

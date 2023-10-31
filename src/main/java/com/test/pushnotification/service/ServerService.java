@@ -8,6 +8,10 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class ServerService {
+    private static User getUserObject(String username) {
+        return ServerManager.getUserByUsername(username);
+    }
+
     public void subscribe(String username, ServerEventType event) {
         getUserObject(username).subscribe(event);
     }
@@ -18,9 +22,5 @@ public class ServerService {
 
     public void unsubscribeFromAllEvents(String username) {
         getUserObject(username).unsubscribeFromAllEvents();
-    }
-
-    private static User getUserObject(String username) {
-        return ServerManager.getUserByUsername(username);
     }
 }

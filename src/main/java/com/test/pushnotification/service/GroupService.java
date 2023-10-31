@@ -66,7 +66,7 @@ public class GroupService {
         return group.addMember(request.getAdminName(), request.getMemberName());
     }
 
-    public void sendMessage(GroupMessageRequest request, MultipartFile file)  {
+    public void sendMessage(GroupMessageRequest request, MultipartFile file) {
         isExistGroup(request.getGroupName());
         GroupMessage message = modelMapper.map(request, GroupMessage.class);
         try {
@@ -126,15 +126,16 @@ public class GroupService {
         Group group = ServerManager.getGroupByName(groupName);
         group.unsubscribeAllEvents(member);
     }
+
     public void subscribe(String groupName, String username, GroupEventType event) {
         isExistGroup(groupName);
         Group group = ServerManager.getGroupByName(groupName);
-        group.subscribeEvent(username,event);
+        group.subscribeEvent(username, event);
     }
 
     public void unsubscribe(String groupName, String username, GroupEventType event) {
         isExistGroup(groupName);
         Group group = ServerManager.getGroupByName(groupName);
-        group.unsubscribeEvent(username,event);
+        group.unsubscribeEvent(username, event);
     }
 }

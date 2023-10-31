@@ -2,9 +2,9 @@ package com.test.pushnotification.model.message;
 
 import com.test.pushnotification.events.GroupEventType;
 import lombok.*;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.io.Serializable;
+
 @Getter
 @Setter
 @NoArgsConstructor

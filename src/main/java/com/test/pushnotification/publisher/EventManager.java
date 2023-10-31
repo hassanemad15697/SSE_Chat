@@ -7,16 +7,12 @@ import com.test.pushnotification.events.UserEventTypes;
 import com.test.pushnotification.exception.ChatException;
 import com.test.pushnotification.exception.ErrorCode;
 import com.test.pushnotification.model.message.GroupMessage;
+import com.test.pushnotification.model.message.Message;
 import com.test.pushnotification.model.message.ServerMessage;
 import com.test.pushnotification.model.message.UserMessage;
-import com.test.pushnotification.request.message.GroupMessageRequest;
-import com.test.pushnotification.model.message.Message;
-import com.test.pushnotification.request.message.ServerMessageRequest;
-import com.test.pushnotification.request.message.UserMessageRequest;
 import com.test.pushnotification.singleton.ObjectMapperSingleton;
 import com.test.pushnotification.singleton.ServerManager;
 import lombok.Getter;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Set;
 
@@ -36,10 +32,10 @@ public class EventManager {
         } else if (eventMessage.getEventType() instanceof UserEventTypes) {
             UserMessage message = (UserMessage) eventMessage;
             Set<String> allUsernamesSubscribingAnEvent = ServerManager.getAllUsernamesSubscribingAnEvent(message.getEventType());
-            if(allUsernamesSubscribingAnEvent.contains(message.getTo())) {
+            if (allUsernamesSubscribingAnEvent.contains(message.getTo())) {
                 ServerManager.getUserByUsername(message.getTo()).update(message);
-            }else {
-                throw new ChatException(ErrorCode.USER_NOT_ACCEPT_MESSAGES,"user "+message.getTo()+" doesn't accept any messages");
+            } else {
+                throw new ChatException(ErrorCode.USER_NOT_ACCEPT_MESSAGES, "user " + message.getTo() + " doesn't accept any messages");
             }
         } else if (eventMessage.getEventType() instanceof GroupEventType) {
             GroupMessage message = (GroupMessage) eventMessage;

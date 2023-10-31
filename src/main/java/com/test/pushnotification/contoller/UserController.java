@@ -44,11 +44,13 @@ public class UserController {
         userService.sendOfflineMessages(username);
         return ResponseEntity.ok().build();
     }
+
     @GetMapping(value = "/disconnect/{username}")
     @Operation(summary = "Close a connection")
     public void closeUserConnection(@PathVariable("username") String username) {
-         userService.closeConnection(username);
+        userService.closeConnection(username);
     }
+
     @GetMapping(value = "/get/{username}")
     @Operation(summary = "Get user data")
     public Response getUser(@PathVariable("username") String username) {

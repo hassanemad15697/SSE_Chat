@@ -12,7 +12,7 @@ public class DefaultUsers {
     private UserService userService;
 
     @Bean
-    public void createDefaultUsers(){
+    public void createDefaultUsers() {
         userService.addUser("hassan");
         userService.addUser("amro");
     }

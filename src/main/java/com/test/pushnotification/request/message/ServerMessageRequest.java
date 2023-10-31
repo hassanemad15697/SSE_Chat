@@ -11,7 +11,7 @@ import java.io.Serializable;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ServerMessageRequest implements  Serializable {
+public class ServerMessageRequest implements Serializable {
     private ServerEventType eventType;
     private Object message;
 //    private LocalDateTime when;

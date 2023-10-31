@@ -7,7 +7,6 @@ import com.test.pushnotification.exception.ErrorCode;
 import com.test.pushnotification.listeners.EventListener;
 import com.test.pushnotification.model.message.GroupMessage;
 import com.test.pushnotification.model.message.Message;
-import com.test.pushnotification.request.message.GroupMessageRequest;
 import com.test.pushnotification.response.BasicResponse;
 import com.test.pushnotification.response.GroupMemberResponse;
 import com.test.pushnotification.response.Response;
@@ -31,19 +30,23 @@ public class Group implements EventListener {
 
     public Group(String createdBy, String groupName) {
         // Generate a random UUID
-        this.id=UUID.randomUUID();
+        this.id = UUID.randomUUID();
         this.groupName = groupName;
         this.createdBy = createdBy;
         groupUsersAndRoles = new ConcurrentHashMap<>();
         //by default the group creator will have all the permissions
         groupUsersAndRoles.put(this.createdBy, new HashSet<>(Arrays.asList(GroupPermissions.values())));
         //fill the map with all the group events and make the group creator subscribe all the events
-        Arrays.stream(GroupEventType.values()).forEach(event -> groupEventsSubscribers.put(event,new HashSet<>()));
+        Arrays.stream(GroupEventType.values()).forEach(event -> groupEventsSubscribers.put(event, new HashSet<>()));
         subscribeAllEvents(createdBy);
         getUserObject(createdBy).joinGroup(groupName);
         ServerManager.getAllGroups().put(groupName, this);
         this.update(groupMessageRequestBuilder(createdBy, GroupEventType.groupCreated, createdBy + " created " + groupName + " group."));
         this.update(groupMessageRequestBuilder(createdBy, GroupEventType.memberJoined, createdBy + " joind " + groupName + " group."));
+    }
+
+    private static User getUserObject(String username) {
+        return ServerManager.getUserByUsername(username);
     }
 
     @Override
@@ -54,17 +57,18 @@ public class Group implements EventListener {
         });
     }
 
-    private Set<String> getEventSubscribers(EventType eventType){
+    private Set<String> getEventSubscribers(EventType eventType) {
         return groupEventsSubscribers.get(eventType);
     }
+
     public Response addMember(String admin, String usernameToAdd) {
         isExist(admin);
         isExist(usernameToAdd);
         isGroupMember(admin);
         havePermission(admin, GroupPermissions.ADD_MEMBER);
         if (this.groupUsersAndRoles.containsKey(usernameToAdd)) {
-            throw new ChatException(ErrorCode.GROUP_MEMBER,"user is already a group member");
-        }else {
+            throw new ChatException(ErrorCode.GROUP_MEMBER, "user is already a group member");
+        } else {
             // assign default roles to the new member
             this.groupUsersAndRoles.put(usernameToAdd, new HashSet<>());
             this.groupUsersAndRoles.get(usernameToAdd).add(GroupPermissions.LEAVE_GROUP);
@@ -86,11 +90,13 @@ public class Group implements EventListener {
         isGroupMember(username);
         groupEventsSubscribers.values().forEach(subscribersSet -> subscribersSet.add(username));
     }
+
     public void unsubscribeAllEvents(String username) {
         isExist(username);
         isGroupMember(username);
         groupEventsSubscribers.values().forEach(subscribersSet -> subscribersSet.remove(username));
     }
+
     public void subscribeEvent(String username, GroupEventType event) {
         isExist(username);
         isGroupMember(username);
@@ -110,7 +116,6 @@ public class Group implements EventListener {
         }
         eventSubscribers.remove(username);
     }
-
 
     public Response removeMember(String admin, String userToRemove) {
         isExist(admin);
@@ -182,20 +187,20 @@ public class Group implements EventListener {
 
     private void havePermission(String username, GroupPermissions role) {
         Set<GroupPermissions> roles = this.groupUsersAndRoles.get(username);
-        if (!roles.contains(role)){
-            throw new ChatException(ErrorCode.USER_DOES_NOT_HAVE_PERMISSION, "member " + username + " doesn't have permission "+role.name());
+        if (!roles.contains(role)) {
+            throw new ChatException(ErrorCode.USER_DOES_NOT_HAVE_PERMISSION, "member " + username + " doesn't have permission " + role.name());
         }
     }
 
-    private void isExist(String username){
-       if(!ServerManager.hasUser(username)){
-           throw new ChatException(ErrorCode.USER_NOT_EXISTS,"there is no user with such name ("+username+")");
-       }
+    private void isExist(String username) {
+        if (!ServerManager.hasUser(username)) {
+            throw new ChatException(ErrorCode.USER_NOT_EXISTS, "there is no user with such name (" + username + ")");
+        }
     }
 
     private void isGroupMember(String username) {
-        if(!this.groupUsersAndRoles.containsKey(username)){
-             throw new ChatException(ErrorCode.NOT_GROUP_MEMBER, "member " + username + " not a group member");
+        if (!this.groupUsersAndRoles.containsKey(username)) {
+            throw new ChatException(ErrorCode.NOT_GROUP_MEMBER, "member " + username + " not a group member");
         }
     }
 
@@ -210,9 +215,6 @@ public class Group implements EventListener {
                 .eventType(eventType)
                 .message(message)
                 .build();
-    }
-    private static User getUserObject(String username) {
-        return ServerManager.getUserByUsername(username);
     }
 
 

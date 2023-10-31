@@ -4,8 +4,6 @@ import com.test.pushnotification.events.UserEventTypes;
 import com.test.pushnotification.model.message.Message;
 import lombok.Getter;
 import lombok.Setter;
-import org.springframework.lang.Nullable;
-import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;

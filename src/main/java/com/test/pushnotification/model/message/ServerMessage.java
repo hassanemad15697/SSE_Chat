@@ -4,6 +4,7 @@ import com.test.pushnotification.events.ServerEventType;
 import lombok.*;
 
 import java.io.Serializable;
+
 @Setter
 @Getter
 @Builder
