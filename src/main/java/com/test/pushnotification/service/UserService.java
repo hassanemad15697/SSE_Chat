@@ -17,6 +17,9 @@ import com.test.pushnotification.singleton.ServerManager;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.EnableAsync;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
@@ -104,7 +107,7 @@ public class UserService {
         return ServerManager.getAllUsers().values();
     }
 
-    public SseEmitter connect(String username) {
+    public Object connect(String username) {
         log.info("trying to connect {}", username);
         return getUserObject(username).connect();
     }
@@ -118,4 +121,23 @@ public class UserService {
     public void sendOfflineMessages(String username) {
         getUserObject(username).sendOfflineMessages();
     }
+
+
+    @Async
+    @Scheduled(fixedRate = 20000) // Send data every 10 seconds
+    public void sendPing() {
+        ServerManager.getAllUsersObjects().forEach(user -> {
+            log.info("PING from server to user: {}",user.getUsername());
+            if (user.getSseEmitter() != null) {
+                try {
+                    user.getSseEmitter().send(SseEmitter.event().name("ping").data("Ping from the server"));
+                } catch (Exception e) {
+                    // Handle exceptions or client disconnects
+                    user.closeConnection();
+                }
+            }
+        });
+
+    }
+
 }

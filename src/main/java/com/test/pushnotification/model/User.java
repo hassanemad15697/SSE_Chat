@@ -9,6 +9,8 @@ import com.test.pushnotification.singleton.ServerManager;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
@@ -23,7 +25,7 @@ import static com.test.pushnotification.service.UserService.disconnected;
 public class User implements EventListener {
 
     private UUID id;
-    // username
+    // username (identifier)
     private String username;
     // save all the messages that this user has received
     private UserMetaData userMetaData;
@@ -36,11 +38,13 @@ public class User implements EventListener {
         // Generate a random UUID
         this.id=UUID.randomUUID();
         this.username = username;
+        setSseEmitter(new SseEmitter(Long.MAX_VALUE));
         isActive = false;
         ServerManager.getAllUsers().put(username, this);
         userMetaData = new UserMetaData(username);
         messages = new HashSet<>();
     }
+
     @Override
     public void update(Message eventMessage) {
         String responseAsJson;
@@ -64,7 +68,7 @@ public class User implements EventListener {
     }
 
     public void subscribe(EventType event) {
-       this.getUserMetaData().subscribe(event);
+        this.getUserMetaData().subscribe(event);
     }
 
     public void unsubscribe(EventType event) {
@@ -89,14 +93,12 @@ public class User implements EventListener {
     }
 
     public SseEmitter connect() {
-        if (this.sseEmitter != null) {
-            log.info("Completing the existing connection for user: " + username);
-            this.sseEmitter.complete();
-        }
+        log.info("Returning the SSE emitter for user: " + username);
+        return this.getSseEmitter();
+    }
 
-        log.info("Creating a new SSE emitter for user: " + username);
-        this.setSseEmitter(new SseEmitter(Long.MAX_VALUE));
-
+    private void setSseEmitter(SseEmitter sseEmitter) {
+        this.sseEmitter = sseEmitter;
         this.getSseEmitter().onCompletion(() -> {
             disconnected(username);
         });
@@ -106,23 +108,10 @@ public class User implements EventListener {
         this.getSseEmitter().onError(throwable -> {
             disconnected(username);
         });
+    }
 
-        log.info("Returning the SSE emitter for user: " + username);
-        return this.getSseEmitter();
-    }
-    @Scheduled(fixedRate = 20000) // Send "ping" every 20 seconds
-    public void sendPing() {
-        if (sseEmitter != null) {
-            try {
-                String pingMessage = "Ping from the server"; // Customize your ping message
-                sseEmitter.send(SseEmitter.event().name("ping").data(pingMessage));
-            } catch (Exception e) {
-                // Handle exceptions or client disconnects
-                closeConnection();
-            }
-        }
-    }
     public void closeConnection() {
         this.getSseEmitter().complete();
+        setSseEmitter(new SseEmitter(Long.MAX_VALUE));
     }
 }
