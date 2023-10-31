@@ -36,8 +36,8 @@ public class UserService {
 
     public static void disconnected(String username) {
         getUserObject(username).setIsActive(false);
-        notification.serverNotification(serverMessageRequestBuilder(ServerEventType.userLeft, username));
-        notification.serverNotification(serverMessageRequestBuilder(ServerEventType.updatedUsersAndGroupsList, ServerManager.updatedLists()));
+        notification.serverNotification(serverMessageRequestBuilder(ServerEventType.isOffline, username));
+//        notification.serverNotification(serverMessageRequestBuilder(ServerEventType.updatedUsersAndGroupsList, ServerManager.updatedLists()));
     }
 
     private static ServerMessage serverMessageRequestBuilder(ServerEventType eventTypes, Object message) {
@@ -84,6 +84,8 @@ public class UserService {
 
     public void delete(String username) {
         getUserObject(username).delete();
+        notification.serverNotification(serverMessageRequestBuilder(ServerEventType.userDeleted, username));
+        notification.serverNotification(serverMessageRequestBuilder(ServerEventType.updatedUsersAndGroupsList, ServerManager.updatedLists()));
     }
 
     public void subscribe(String username, EventType event) {
@@ -110,10 +112,11 @@ public class UserService {
     public Object connect(String username) {
         log.info("trying to connect {}", username);
         User userObject = getUserObject(username);
+        userObject.connect();
         notification.serverNotification(serverMessageRequestBuilder(ServerEventType.isOnline, username));
         log.info("send the updated list to user: {}", username);
         notification.serverNotification(serverMessageRequestBuilder(ServerEventType.updatedUsersAndGroupsList, ServerManager.updatedLists()));
-        return userObject.connect();
+        return userObject.getSseEmitter();
     }
 
     public void closeConnection(String username) {
@@ -134,7 +137,7 @@ public class UserService {
             if (user.getSseEmitter() != null) {
                 try {
                     if (user.getIsActive()){
-                        user.update(serverMessageRequestBuilder(ServerEventType.ping, "Ping from the server to keep connection alive"));
+                        user.update(serverMessageRequestBuilder(ServerEventType.ping, "KeepAlive"));
                         log.info("PING from server to user: {}",user.getUsername());
                     }
                 } catch (Exception e) {

@@ -54,7 +54,8 @@ public class User implements EventListener {
         } catch (JsonProcessingException e) {
             log.error("Failed to serialize message to JSON: " + e.getMessage());
         } catch (IOException e) {
-            log.error("Failed to send message to the client: " + e.getMessage());
+            log.error("Failed to send message to the client {} : {}" ,username, e.getMessage());
+            closeConnection();
         }
     }
 

@@ -1,7 +1,10 @@
 package com.test.pushnotification.events;
 
 public enum ServerEventType implements EventType {
+    ping,
     updatedUsersAndGroupsList,
     newJoiner,
-    isOnline, ping, userLeft
+    isOnline,
+    isOffline,
+    userDeleted
 }
