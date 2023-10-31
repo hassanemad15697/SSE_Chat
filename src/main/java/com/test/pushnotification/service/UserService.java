@@ -17,6 +17,7 @@ import com.test.pushnotification.singleton.ServerManager;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.util.*;
 
@@ -101,7 +102,7 @@ public class UserService {
         return ServerManager.getAllUsers().values();
     }
 
-    public Object connect(String username) {
+    public SseEmitter connect(String username) {
         return getUserObject(username).connect();
     }
 

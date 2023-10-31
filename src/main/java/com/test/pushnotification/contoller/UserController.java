@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.util.Collection;
 
@@ -34,7 +35,7 @@ public class UserController {
 
     @GetMapping(value = "/connect/{username}")
     @Operation(summary = "Establish a connection")
-    public Object connectUser(@PathVariable("username") String username) {
+    public SseEmitter connectUser(@PathVariable("username") String username) {
         return userService.connect(username);
     }
 
