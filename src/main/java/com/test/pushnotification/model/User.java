@@ -40,15 +40,6 @@ public class User implements EventListener {
         ServerManager.getAllUsers().put(username, this);
         userMetaData = new UserMetaData(username);
         messages = new HashSet<>();
-        this.getSseEmitter().onCompletion(() -> {
-            disconnected(username);
-        });
-        this.getSseEmitter().onTimeout(() -> {
-            disconnected(username);
-        });
-        this.getSseEmitter().onError(throwable -> {
-            disconnected(username);
-        });
     }
 
     @Override
@@ -107,6 +98,16 @@ public class User implements EventListener {
             this.getSseEmitter().complete();
         }
         this.setSseEmitter(new SseEmitter(Long.MAX_VALUE));
+
+        this.getSseEmitter().onCompletion(() -> {
+            disconnected(username);
+        });
+        this.getSseEmitter().onTimeout(() -> {
+            disconnected(username);
+        });
+        this.getSseEmitter().onError(throwable -> {
+            disconnected(username);
+        });
         return this.getSseEmitter();
     }
     public void closeConnection() {
