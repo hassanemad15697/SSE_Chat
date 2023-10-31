@@ -22,7 +22,7 @@ import static com.test.pushnotification.service.UserService.disconnected;
 public class User implements EventListener {
 
     private UUID id;
-    // username (identifier)
+    // username
     private String username;
     // save all the messages that this user has received
     private UserMetaData userMetaData;
@@ -35,27 +35,21 @@ public class User implements EventListener {
         // Generate a random UUID
         this.id=UUID.randomUUID();
         this.username = username;
-//        sseEmitter = new SseEmitter(Long.MAX_VALUE);
         isActive = false;
         ServerManager.getAllUsers().put(username, this);
         userMetaData = new UserMetaData(username);
         messages = new HashSet<>();
     }
-
     @Override
     public void update(Message eventMessage) {
-        String responseAsJson = null;
+        String responseAsJson;
         try {
             responseAsJson = new ObjectMapper().writeValueAsString(eventMessage);
+            sseEmitter.send(SseEmitter.event().name("message").data(responseAsJson));
         } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
-        try {
-            this.getSseEmitter().send(responseAsJson);
+            log.error("Failed to serialize message to JSON: " + e.getMessage());
         } catch (IOException e) {
-           // this.messages.add(eventMessage);
-            System.out.println(e);
-            log.error(String.valueOf(e));
+            log.error("Failed to send message to the client: " + e.getMessage());
         }
     }
 
@@ -94,11 +88,12 @@ public class User implements EventListener {
     }
 
     public SseEmitter connect() {
-        if(this.sseEmitter != null){
-            log.info("complete the existing connect");
-            this.getSseEmitter().complete();
+        if (this.sseEmitter != null) {
+            log.info("Completing the existing connection for user: " + username);
+            this.sseEmitter.complete();
         }
-        log.info("create a new  sse emitter");
+
+        log.info("Creating a new SSE emitter for user: " + username);
         this.setSseEmitter(new SseEmitter(Long.MAX_VALUE));
 
         this.getSseEmitter().onCompletion(() -> {
@@ -111,9 +106,29 @@ public class User implements EventListener {
             disconnected(username);
         });
 
-        log.info("return the emitter");
+        // Start a thread to send periodic "ping" messages to keep the connection alive
+        Runnable keepAliveTask = () -> {
+            while (true) {
+                try {
+                    // Send a "ping" message to the client
+                    String pingMessage = "Connection kept alive for user: " + username;
+                    this.getSseEmitter().send(SseEmitter.event().name("ping").data(pingMessage));
+                    Thread.sleep(19000); // Send a "ping" every 15 seconds
+                } catch (Exception e) {
+                    // Handle exceptions or client disconnects
+                    disconnected(username);
+                    break;
+                }
+            }
+        };
+
+        // Start the keep-alive task in a separate thread
+        new Thread(keepAliveTask).start();
+
+        log.info("Returning the SSE emitter for user: " + username);
         return this.getSseEmitter();
     }
+
     public void closeConnection() {
         this.getSseEmitter().complete();
     }
