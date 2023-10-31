@@ -38,7 +38,6 @@ public class User implements EventListener {
         // Generate a random UUID
         this.id=UUID.randomUUID();
         this.username = username;
-        setSseEmitter(new SseEmitter(Long.MAX_VALUE));
         isActive = false;
         ServerManager.getAllUsers().put(username, this);
         userMetaData = new UserMetaData(username);
@@ -50,7 +49,8 @@ public class User implements EventListener {
         String responseAsJson;
         try {
             responseAsJson = new ObjectMapper().writeValueAsString(eventMessage);
-            sseEmitter.send(SseEmitter.event().name("message").data(responseAsJson));
+            if(getSseEmitter() != null){
+            sseEmitter.send(SseEmitter.event().name("message").data(responseAsJson));}
         } catch (JsonProcessingException e) {
             log.error("Failed to serialize message to JSON: " + e.getMessage());
         } catch (IOException e) {
@@ -94,6 +94,9 @@ public class User implements EventListener {
 
     public SseEmitter connect() {
         log.info("Returning the SSE emitter for user: " + username);
+        if(getSseEmitter() == null){
+            setSseEmitter(new SseEmitter(Long.MAX_VALUE));
+        }
         return this.getSseEmitter();
     }
 

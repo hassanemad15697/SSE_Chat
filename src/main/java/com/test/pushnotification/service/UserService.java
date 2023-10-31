@@ -36,7 +36,7 @@ public class UserService {
 
     public static void disconnected(String username) {
         getUserObject(username).setIsActive(false);
-        notification.serverNotification(serverMessageRequestBuilder(ServerEventType.userLeft, username + " left!"));
+        notification.serverNotification(serverMessageRequestBuilder(ServerEventType.userLeft, username));
         notification.serverNotification(serverMessageRequestBuilder(ServerEventType.updatedUsersAndGroupsList, ServerManager.updatedLists()));
     }
 
@@ -51,7 +51,7 @@ public class UserService {
         }
         //add the user to the list
         User newUser = new User(username);
-        notification.serverNotification(serverMessageRequestBuilder(ServerEventType.newJoiner, username + " joined!"));
+        notification.serverNotification(serverMessageRequestBuilder(ServerEventType.newJoiner, username));
         notification.serverNotification(serverMessageRequestBuilder(ServerEventType.updatedUsersAndGroupsList, ServerManager.updatedLists()));
         return newUser;
     }
@@ -109,7 +109,9 @@ public class UserService {
 
     public Object connect(String username) {
         log.info("trying to connect {}", username);
-        return getUserObject(username).connect();
+        User userObject = getUserObject(username);
+        notification.serverNotification(serverMessageRequestBuilder(ServerEventType.isOnline, username));
+        return userObject.connect();
     }
 
     public void closeConnection(String username) {
@@ -130,7 +132,7 @@ public class UserService {
             log.info("PING from server to user: {}",user.getUsername());
             if (user.getSseEmitter() != null) {
                 try {
-                    user.getSseEmitter().send(SseEmitter.event().name("ping").data("Ping from the server"));
+                    user.getSseEmitter().send(SseEmitter.event().name("ping").data("Ping from the server to keep connection alive"));
                 } catch (Exception e) {
                     // Handle exceptions or client disconnects
                     user.closeConnection();
