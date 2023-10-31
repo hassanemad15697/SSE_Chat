@@ -115,6 +115,7 @@ public class User implements EventListener {
     }
 
     public void closeConnection() {
+        log.info("cannot reach user: {} too kep the connection alive",getUsername());
         this.getSseEmitter().complete();
         setSseEmitter(new SseEmitter(Long.MAX_VALUE));
     }
