@@ -116,7 +116,7 @@ public class User implements EventListener {
                     Thread.sleep(19000); // Send a "ping" every 15 seconds
                 } catch (Exception e) {
                     // Handle exceptions or client disconnects
-                    disconnected(username);
+                    closeConnection();
                     break;
                 }
             }
