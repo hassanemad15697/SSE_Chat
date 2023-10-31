@@ -8,6 +8,7 @@ import com.test.pushnotification.model.message.Message;
 import com.test.pushnotification.singleton.ServerManager;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.io.IOException;
@@ -17,6 +18,7 @@ import static com.test.pushnotification.service.UserService.disconnected;
 
 @Setter
 @Getter
+@Slf4j
 public class User implements EventListener {
 
     private UUID id;
@@ -61,6 +63,8 @@ public class User implements EventListener {
             this.getSseEmitter().send(responseAsJson);
         } catch (IOException e) {
            // this.messages.add(eventMessage);
+            System.out.println(e);
+            log.error(String.valueOf(e));
         }
     }
 
@@ -98,8 +102,14 @@ public class User implements EventListener {
         messages.clear();
     }
 
+    public SseEmitter connect() {
+        if(this.sseEmitter != null){
+            this.getSseEmitter().complete();
+        }
+        this.setSseEmitter(new SseEmitter(Long.MAX_VALUE));
+        return this.getSseEmitter();
+    }
     public void closeConnection() {
-        this.sseEmitter.complete();
-        this.sseEmitter= new SseEmitter(Long.MAX_VALUE);
+        this.getSseEmitter().complete();
     }
 }
