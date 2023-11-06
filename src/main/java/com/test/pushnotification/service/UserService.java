@@ -33,6 +33,7 @@ public class UserService {
     private ModelMapper modelMapper;
 
     public static void disconnected(String username) {
+        log.info("user diconnected: {}",username);
         getUserObject(username).setIsActive(false);
         notification.serverNotification(serverMessageRequestBuilder(ServerEventType.isOffline, username));
 //        notification.serverNotification(serverMessageRequestBuilder(ServerEventType.updatedUsersAndGroupsList, ServerManager.updatedLists()));
