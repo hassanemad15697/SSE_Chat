@@ -40,8 +40,8 @@ public class GroupService {
         return ServerManager.hasGroup(groupName);
     }
 
-    private static ServerMessage serverMessageRequestBuilder(ServerEventType eventTypes, Object message) {
-        return ServerMessage.builder().eventType(eventTypes).message(message).build();
+    private static ServerMessage serverMessageRequestBuilder(ServerEventType eventTypes, String message) {
+        return new ServerMessage(eventTypes,message);
     }
 
     public Response createNewGroup(GroupRequest request) {

@@ -41,8 +41,8 @@ public class Group implements EventListener {
         subscribeAllEvents(createdBy);
         getUserObject(createdBy).joinGroup(groupName);
         ServerManager.getAllGroups().put(groupName, this);
-        this.update(groupMessageRequestBuilder(createdBy, GroupEventType.groupCreated, createdBy + " created " + groupName + " group."));
-        this.update(groupMessageRequestBuilder(createdBy, GroupEventType.memberJoined, createdBy + " joind " + groupName + " group."));
+        this.update(groupMessageRequestBuilder(createdBy, GroupEventType.groupCreated, createdBy + " created " + groupName + " group.",""));
+        this.update(groupMessageRequestBuilder(createdBy, GroupEventType.memberJoined, createdBy + " joind " + groupName + " group.",""));
     }
 
     private static User getUserObject(String username) {
@@ -75,7 +75,7 @@ public class Group implements EventListener {
             // make the new member subscribe all events
             subscribeAllEvents(usernameToAdd);
             getUserObject(usernameToAdd).joinGroup(groupName);
-            this.update(groupMessageRequestBuilder(admin, GroupEventType.memberJoined, admin + " added " + usernameToAdd + " to " + groupName + " group."));
+            this.update(groupMessageRequestBuilder(admin, GroupEventType.memberJoined, admin + " added " + usernameToAdd + " to " + groupName + " group.",""));
         }
         return GroupMemberResponse.builder()
                 .groupName(this.groupName)
@@ -125,7 +125,7 @@ public class Group implements EventListener {
         havePermission(admin, GroupPermissions.DELETE_MEMBER);
         this.groupUsersAndRoles.remove(userToRemove);
         getUserObject(userToRemove).leaveGroup(groupName);
-        this.update(groupMessageRequestBuilder(admin, GroupEventType.groupDeleted, admin + " deleted " + userToRemove + " from " + groupName + " group."));
+        this.update(groupMessageRequestBuilder(admin, GroupEventType.groupDeleted, admin + " deleted " + userToRemove + " from " + groupName + " group.",""));
         return BasicResponse.builder().message(userToRemove + " deleted").build();
     }
 
@@ -134,7 +134,7 @@ public class Group implements EventListener {
         isGroupMember(username);
         havePermission(username, GroupPermissions.LEAVE_GROUP);
         getUserObject(username).leaveGroup(groupName);
-        this.update(groupMessageRequestBuilder(username, GroupEventType.memberLeft, username + " left the group."));
+        this.update(groupMessageRequestBuilder(username, GroupEventType.memberLeft, username + " left the group.",""));
         this.groupUsersAndRoles.remove(username);
         return BasicResponse.builder().message(username + " left").build();
     }
@@ -146,7 +146,7 @@ public class Group implements EventListener {
         isGroupMember(userToAssign);
         havePermission(admin, GroupPermissions.ASSIGN_NEW_ROLE);
         this.groupUsersAndRoles.get(userToAssign).add(permission);
-        this.update(groupMessageRequestBuilder(admin, GroupEventType.memberWithNewRole, admin + " gave member " + userToAssign + " the permission to " + permission.name()));
+        this.update(groupMessageRequestBuilder(admin, GroupEventType.memberWithNewRole, admin + " gave member " + userToAssign + " the permission to " + permission.name(),""));
         return GroupMemberResponse.builder()
                 .groupName(this.groupName)
                 .modifiedBy(admin)
@@ -162,7 +162,7 @@ public class Group implements EventListener {
         isGroupMember(userToAssign);
         havePermission(admin, GroupPermissions.DELETE_ROLE_FROM_USER);
         this.groupUsersAndRoles.get(userToAssign).remove(permission);
-        this.update(groupMessageRequestBuilder(admin, GroupEventType.memberWithoutNewRole, admin + " removed " + " the permission to " + permission.name() + " from " + userToAssign));
+        this.update(groupMessageRequestBuilder(admin, GroupEventType.memberWithoutNewRole, admin + " removed " + " the permission to " + permission.name() + " from " + userToAssign,""));
         return GroupMemberResponse.builder()
                 .groupName(this.groupName)
                 .modifiedBy(admin)
@@ -208,13 +208,8 @@ public class Group implements EventListener {
         return ServerManager.getUserByUsername(username);
     }
 
-    private GroupMessage groupMessageRequestBuilder(String from, GroupEventType eventType, String message) {
-        return GroupMessage.builder()
-                .groupName(this.groupName)
-                .from(from)
-                .eventType(eventType)
-                .message(message)
-                .build();
+    private GroupMessage groupMessageRequestBuilder(String from, GroupEventType eventType, String message,  String file) {
+        return new GroupMessage(this.groupName,from,eventType,message,file);
     }
 
 

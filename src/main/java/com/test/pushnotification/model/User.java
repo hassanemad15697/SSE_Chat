@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.test.pushnotification.events.EventType;
 import com.test.pushnotification.listeners.EventListener;
 import com.test.pushnotification.model.message.Message;
+import com.test.pushnotification.request.UserSignupRequest;
 import com.test.pushnotification.singleton.ServerManager;
 import lombok.Getter;
 import lombok.Setter;
@@ -12,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.io.IOException;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
@@ -26,21 +28,30 @@ public class User implements EventListener {
     private UUID id;
     // username (identifier)
     private String username;
+    private Boolean isActive;
+    private Set<Message> messages;
+    private String email;
+    private Gender gender;
+    private Date dateOfBirth;
+    private String profilePicture;
+    private String password;
     // save all the messages that this user has received
     private UserMetaData userMetaData;
     // SSE Emitter object to establish the connection between the client and the sever
     private SseEmitter sseEmitter;
-    private Boolean isActive;
-    private Set<Message> messages;
-
-    public User(String username) {
+    public User(UserSignupRequest request) {
         // Generate a random UUID
         this.id = UUID.randomUUID();
-        this.username = username;
+        this.username = request.getUsername();
         isActive = false;
-        ServerManager.getAllUsers().put(username, this);
-        userMetaData = new UserMetaData(username);
+        ServerManager.getAllUsers().put(request.getUsername(), this);
+        userMetaData = new UserMetaData(request.getUsername());
         messages = new HashSet<>();
+        email=request.getEmail();
+        password=request.getPassword();
+        profilePicture=request.getProfilePicture();
+        gender=request.getGender();
+        dateOfBirth=request.getDateOfBirth();
     }
 
     @Override

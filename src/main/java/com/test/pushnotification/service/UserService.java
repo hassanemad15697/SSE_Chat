@@ -9,6 +9,7 @@ import com.test.pushnotification.exception.ErrorCode;
 import com.test.pushnotification.model.User;
 import com.test.pushnotification.model.message.ServerMessage;
 import com.test.pushnotification.model.message.UserMessage;
+import com.test.pushnotification.request.UserSignupRequest;
 import com.test.pushnotification.request.message.UserMessageRequest;
 import com.test.pushnotification.response.Response;
 import com.test.pushnotification.response.UserResponse;
@@ -37,29 +38,27 @@ public class UserService {
 //        notification.serverNotification(serverMessageRequestBuilder(ServerEventType.updatedUsersAndGroupsList, ServerManager.updatedLists()));
     }
 
-    private static ServerMessage serverMessageRequestBuilder(ServerEventType eventTypes, Object message) {
-        return ServerMessage.builder().eventType(eventTypes).message(message).build();
+    private static ServerMessage serverMessageRequestBuilder(ServerEventType eventTypes, String message) {
+        return new ServerMessage(eventTypes,message);
     }
 
     private static User getUserObject(String username) {
         return ServerManager.getUserByUsername(username);
     }
 
-    public User addUser(String username) {
+    public User addUser( UserSignupRequest request) {
         //check if the user not exists in the list
-        if (ServerManager.hasUser(username)) {
+        if (ServerManager.hasUser(request.getUsername())) {
             throw new ChatException(ErrorCode.USER_ALREADY_EXISTS, "other user with this name already exists");
         }
         //add the user to the list
-        User newUser = new User(username);
-        notification.serverNotification(serverMessageRequestBuilder(ServerEventType.newJoiner, username));
+        User newUser = new User(request);
+        notification.serverNotification(serverMessageRequestBuilder(ServerEventType.newJoiner, request.getUsername()));
         notification.serverNotification(serverMessageRequestBuilder(ServerEventType.updatedUsersAndGroupsList, ServerManager.updatedLists()));
         return newUser;
     }
 
-    public Response getUser(String username) {
-        return modelMapper.map(getUserObject(username), UserResponse.class);
-    }
+
 
 //    private String convertImageToBase64(MultipartFile file) {
 //        try {
@@ -104,7 +103,9 @@ public class UserService {
     public Collection<User> getAllUser() {
         return ServerManager.getAllUsers().values();
     }
-
+    public Response getUser(String username) {
+        return modelMapper.map(getUserObject(username), UserResponse.class);
+    }
     public Object connect(String username) {
         log.info("trying to connect {}", username);
         User userObject = getUserObject(username);
@@ -125,24 +126,24 @@ public class UserService {
         getUserObject(username).sendOfflineMessages();
     }
 
-
-    @Scheduled(fixedRate = 20000) // Send data every 20 seconds
-    public void sendPing() {
-        ServerManager.getAllUsersObjects().forEach(user -> {
-            if (user.getSseEmitter() != null) {
-                try {
-                    if (user.getIsActive()) {
-                        user.update(serverMessageRequestBuilder(ServerEventType.ping, "KeepAlive"));
-                        log.info("PING from server to user: {}", user.getUsername());
-                    }
-                } catch (Exception e) {
-                    // Handle exceptions or client disconnects
-                    log.info("cannot reach user: {} too kep the connection alive", user.getUsername());
-                    user.closeConnection();
-                }
-            }
-        });
-
-    }
+//
+//    @Scheduled(fixedRate = 20000) // Send data every 20 seconds
+//    public void sendPing() {
+//        ServerManager.getAllUsersObjects().forEach(user -> {
+//            if (user.getSseEmitter() != null) {
+//                try {
+//                    if (user.getIsActive()) {
+//                        user.update(serverMessageRequestBuilder(ServerEventType.ping, "KeepAlive"));
+//                        log.info("PING from server to user: {}", user.getUsername());
+//                    }
+//                } catch (Exception e) {
+//                    // Handle exceptions or client disconnects
+//                    log.info("cannot reach user: {} too kep the connection alive", user.getUsername());
+//                    user.closeConnection();
+//                }
+//            }
+//        });
+//
+//    }
 
 }

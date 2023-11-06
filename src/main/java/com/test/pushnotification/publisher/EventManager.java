@@ -27,7 +27,7 @@ public class EventManager {
 
         if (eventMessage.getEventType() instanceof ServerEventType) {
             ServerMessage message = (ServerMessage) eventMessage;
-            ServerEventType eventType = message.getEventType();
+            ServerEventType eventType = (ServerEventType) message.getEventType();
             ServerManager.getAllSubscribersObjectsToEvent(eventType).forEach(user -> user.update(message));
         } else if (eventMessage.getEventType() instanceof UserEventTypes) {
             UserMessage message = (UserMessage) eventMessage;

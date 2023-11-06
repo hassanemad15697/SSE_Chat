@@ -3,6 +3,7 @@ package com.test.pushnotification.contoller;
 import com.test.pushnotification.events.UserEventTypes;
 import com.test.pushnotification.model.User;
 import com.test.pushnotification.request.UserLoginRequest;
+import com.test.pushnotification.request.UserSignupRequest;
 import com.test.pushnotification.request.message.UserMessageRequest;
 import com.test.pushnotification.response.Response;
 import com.test.pushnotification.service.UserService;
@@ -14,6 +15,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.Collection;
 
 @RestController
@@ -27,8 +29,8 @@ public class UserController {
 
     @Operation(summary = "Create new user")
     @PostMapping(value = "/add")
-    public User createNewUser(@RequestBody UserLoginRequest request) {
-        return userService.addUser(request.getUsername());
+    public User createNewUser(@Valid @RequestBody UserSignupRequest request) {
+        return userService.addUser(request);
     }
 
 
@@ -36,6 +38,14 @@ public class UserController {
     @Operation(summary = "Establish a connection")
     public Object connectUser(@PathVariable("username") String username) {
         return userService.connect(username);
+    }
+
+    @GetMapping(value = "/keep-alive/{username}")
+    @Operation(summary = "Keep connection alive")
+    public ResponseEntity<String> keepAlive(@PathVariable("username") String username) {
+        // Acknowledge the "ping" request
+        log.info("Connection kept alive for user: {}" , username);
+        return new ResponseEntity<>( HttpStatus.NO_CONTENT);
     }
 
     @GetMapping(value = "/ready/{username}")

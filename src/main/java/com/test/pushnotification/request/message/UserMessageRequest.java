@@ -7,11 +7,12 @@ import lombok.Setter;
 
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
+import java.time.Instant;
 
 
 @Setter
 @Getter
-public class UserMessageRequest implements Message, Serializable {
+public class UserMessageRequest implements Serializable {
     @NotNull
     private String from;
     @NotNull
