@@ -13,10 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.io.IOException;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 import static com.test.pushnotification.service.UserService.disconnected;
 
@@ -46,7 +43,7 @@ public class User implements EventListener {
         isActive = false;
         ServerManager.getAllUsers().put(request.getUsername(), this);
         userMetaData = new UserMetaData(request.getUsername());
-        messages = new HashSet<>();
+        messages = new LinkedHashSet<>();
         email=request.getEmail();
         password=request.getPassword();
         profilePicture=request.getProfilePicture();
@@ -60,12 +57,19 @@ public class User implements EventListener {
         try {
             responseAsJson = new ObjectMapper().writeValueAsString(eventMessage);
             if (getSseEmitter() != null) {
+                if(!messages.isEmpty()){
+                    sseEmitter.send(messages);
+                    log.info("{} missed messages sent to user ({})", messages.size(),username);
+                    messages.clear();
+                }
                 sseEmitter.send(responseAsJson);
             }
         } catch (JsonProcessingException e) {
             log.error("Failed to serialize message to JSON: " + e.getMessage());
         } catch (IOException e) {
             log.error("Failed to send message to the client {} : {}", username, e.getMessage());
+            log.error("messages stored for client {}", username);
+            messages.add(eventMessage);
             closeConnection();
         }
     }

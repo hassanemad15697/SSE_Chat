@@ -7,6 +7,7 @@ import com.test.pushnotification.events.ServerEventType;
 import com.test.pushnotification.exception.ChatException;
 import com.test.pushnotification.exception.ErrorCode;
 import com.test.pushnotification.model.User;
+import com.test.pushnotification.model.message.Message;
 import com.test.pushnotification.model.message.ServerMessage;
 import com.test.pushnotification.model.message.UserMessage;
 import com.test.pushnotification.request.UserSignupRequest;
@@ -22,6 +23,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.util.Collection;
+import java.util.Set;
 
 @Service
 @Slf4j
@@ -104,9 +106,11 @@ public class UserService {
     public Collection<User> getAllUser() {
         return ServerManager.getAllUsers().values();
     }
+
     public Response getUser(String username) {
         return modelMapper.map(getUserObject(username), UserResponse.class);
     }
+
     public Object connect(String username) {
         log.info("trying to connect {}", username);
         User userObject = getUserObject(username);

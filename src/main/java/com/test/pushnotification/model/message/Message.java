@@ -17,7 +17,6 @@ public abstract class Message {
     private String timestamp;
 
     public Message(){
-
         this.timestamp = Instant.now().atZone(ZoneId.systemDefault()).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
     }
 

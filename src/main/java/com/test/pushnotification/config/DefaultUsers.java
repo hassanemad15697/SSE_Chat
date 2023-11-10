@@ -1,9 +1,11 @@
 package com.test.pushnotification.config;
 
 import com.test.pushnotification.model.Gender;
+import com.test.pushnotification.request.GroupMemberRequest;
+import com.test.pushnotification.request.GroupRequest;
 import com.test.pushnotification.request.UserSignupRequest;
+import com.test.pushnotification.service.GroupService;
 import com.test.pushnotification.service.UserService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
@@ -13,8 +15,14 @@ import java.util.Date;
 @Component
 public class DefaultUsers {
 
-    @Autowired
-    private UserService userService;
+
+    private final UserService userService;
+    private final GroupService groupService;
+
+    public DefaultUsers(UserService userService, GroupService groupService) {
+        this.userService = userService;
+        this.groupService = groupService;
+    }
 
     @Bean
     public void createDefaultUsers() {
@@ -55,5 +63,13 @@ public class DefaultUsers {
         userService.addUser(amro);
         userService.addUser(shams);
         userService.addUser(bahaa);
+
+        GroupRequest group = GroupRequest.builder().groupName("SSE Group").createdBy("hassan").build();
+        groupService.createNewGroup(group);
+
+        GroupMemberRequest groupMemberRequest = GroupMemberRequest.builder().groupName("SSE Group").adminName("hassan").memberName("amro").build();
+        groupService.addMember(groupMemberRequest);
+
+
     }
 }
