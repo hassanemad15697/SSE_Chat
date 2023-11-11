@@ -44,6 +44,7 @@ public class UserController {
     public ResponseEntity<String> keepAlive(@PathVariable("username") String username) {
         // Acknowledge the "ping" request
         log.info("Connection kept alive for user: {}", username);
+        userService.keepAlive(username);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 

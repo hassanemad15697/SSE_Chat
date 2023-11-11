@@ -3,6 +3,7 @@ package com.test.pushnotification.model;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.test.pushnotification.events.EventType;
+import com.test.pushnotification.events.ServerEventType;
 import com.test.pushnotification.listeners.EventListener;
 import com.test.pushnotification.model.message.Message;
 import com.test.pushnotification.request.UserSignupRequest;
@@ -66,8 +67,10 @@ public class User implements EventListener {
             log.error("Failed to serialize message to JSON: " + e.getMessage());
         } catch (IOException e) {
             log.warn("Failed to send message to the client {} : {}", username, e.getMessage());
-            log.info("messages stored for client {}", username);
-            messages.add(eventMessage);
+            if (eventMessage.getEventType() != ServerEventType.ping) {
+                log.info("messages stored for client {}", username);
+                messages.add(eventMessage);
+            }
             closeConnection();
         }
     }

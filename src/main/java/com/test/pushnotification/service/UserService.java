@@ -131,6 +131,10 @@ public class UserService {
         }
     }
 
+    public void keepAlive(String username) {
+        getUserObject(username).update(serverMessageRequestBuilder(ServerEventType.ping, "KeepAlive"));
+    }
+
 
 //    public void sendOfflineMessages(String username) {
 //        getUserObject(username).sendOfflineMessages();
