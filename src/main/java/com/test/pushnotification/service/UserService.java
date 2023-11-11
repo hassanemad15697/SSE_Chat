@@ -34,7 +34,9 @@ public class UserService {
 
     public static void disconnected(String username) {
         log.info("user disconnected: {}", username);
-        getUserObject(username).setIsActive(false);
+        User user = getUserObject(username);
+        user.setIsActive(false);
+        user.createNewSSE();
         notification.serverNotification(serverMessageRequestBuilder(ServerEventType.isOffline, username));
     }
 

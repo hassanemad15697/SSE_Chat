@@ -109,7 +109,7 @@ public class User implements EventListener {
     public SseEmitter connect() {
         log.info("Returning the SSE emitter for user: " + username);
         if (getSseEmitter() == null) {
-            setSseEmitter(new SseEmitter(Long.MAX_VALUE));
+            createNewSSE();
         }
         this.setIsActive(true);
         return this.getSseEmitter();
@@ -131,6 +131,10 @@ public class User implements EventListener {
     public void closeConnection() {
         log.info("cannot reach user: {} to keep the connection alive", getUsername());
         this.getSseEmitter().complete();
+        createNewSSE();
+    }
+
+    public void createNewSSE() {
         setSseEmitter(new SseEmitter(Long.MAX_VALUE));
     }
 }
