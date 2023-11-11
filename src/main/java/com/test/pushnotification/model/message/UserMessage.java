@@ -1,12 +1,11 @@
 package com.test.pushnotification.model.message;
 
 import com.test.pushnotification.events.ServerEventType;
-import com.test.pushnotification.events.UserEventTypes;
-import lombok.*;
-import lombok.experimental.SuperBuilder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.io.Serializable;
-import java.time.Instant;
 
 @Getter
 @Setter
@@ -14,9 +13,9 @@ import java.time.Instant;
 public class UserMessage  extends Message implements Serializable {
     private String from;
     private String to;
-    private String file;
+    private FileMessage file;
 
-    public UserMessage(ServerEventType eventType, String message, String from, String to, String file) {
+    public UserMessage(ServerEventType eventType, String message, String from, String to, FileMessage file) {
         super(eventType, message);
         this.from = from;
         this.to = to;

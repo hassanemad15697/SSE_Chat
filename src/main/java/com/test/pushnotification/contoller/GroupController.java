@@ -14,7 +14,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
+
+import javax.validation.Valid;
 
 @RestController
 @RequestMapping("/group")
@@ -34,9 +35,13 @@ public class GroupController {
 
     @PostMapping("/message")
     @Operation(summary = "Send a message")
-    public ResponseEntity.BodyBuilder sendMessage(@RequestParam(value = "file", required = false) MultipartFile file, @RequestBody GroupMessageRequest request) {
-        groupService.sendMessage(request, file);
-        return ResponseEntity.status(HttpStatus.OK);
+    public ResponseEntity.BodyBuilder sendMessage(@Valid @RequestBody GroupMessageRequest request) {
+        try {
+            groupService.sendGroupMessage(request);
+            return ResponseEntity.ok();
+        } catch (RuntimeException e) {
+            return (ResponseEntity.BodyBuilder) ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+        }
     }
 
     @PostMapping(value = "/add/member")

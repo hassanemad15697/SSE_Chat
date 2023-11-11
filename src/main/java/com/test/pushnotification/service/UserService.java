@@ -1,36 +1,31 @@
 package com.test.pushnotification.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.test.pushnotification.Notifications.Notification;
 import com.test.pushnotification.events.EventType;
 import com.test.pushnotification.events.ServerEventType;
 import com.test.pushnotification.exception.ChatException;
 import com.test.pushnotification.exception.ErrorCode;
 import com.test.pushnotification.model.User;
-import com.test.pushnotification.model.message.Message;
 import com.test.pushnotification.model.message.ServerMessage;
 import com.test.pushnotification.model.message.UserMessage;
 import com.test.pushnotification.request.UserSignupRequest;
 import com.test.pushnotification.request.message.UserMessageRequest;
 import com.test.pushnotification.response.Response;
 import com.test.pushnotification.response.UserResponse;
-import com.test.pushnotification.singleton.ObjectMapperSingleton;
 import com.test.pushnotification.singleton.ServerManager;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import java.util.Base64;
 import java.util.Collection;
-import java.util.Set;
 
 @Service
 @Slf4j
 public class UserService {
 
     private static final Notification notification = new Notification();
-    ObjectMapper objectMapper = ObjectMapperSingleton.getInstance();
     @Autowired
     private ModelMapper modelMapper;
 
@@ -38,7 +33,6 @@ public class UserService {
         log.info("user diconnected: {}",username);
         getUserObject(username).setIsActive(false);
         notification.serverNotification(serverMessageRequestBuilder(ServerEventType.isOffline, username));
-//        notification.serverNotification(serverMessageRequestBuilder(ServerEventType.updatedUsersAndGroupsList, ServerManager.updatedLists()));
     }
 
     private static ServerMessage serverMessageRequestBuilder(ServerEventType eventTypes, String message) {
@@ -50,39 +44,28 @@ public class UserService {
     }
 
     public User addUser( UserSignupRequest request) {
+        log.info("Adding new user");
         //check if the user not exists in the list
         if (ServerManager.hasUser(request.getUsername())) {
             throw new ChatException(ErrorCode.USER_ALREADY_EXISTS, "other user with this name already exists");
         }
         //add the user to the list
         User newUser = new User(request);
+        log.info("User : {} added ", request.getUsername());
         notification.serverNotification(serverMessageRequestBuilder(ServerEventType.newJoiner, request.getUsername()));
+        log.info("Notify subscribers that a new user has been added");
         notification.serverNotification(serverMessageRequestBuilder(ServerEventType.updatedUsersAndGroupsList, ServerManager.updatedLists()));
+        log.info("Notify subscribers with new updated list of users and groups");
         return newUser;
     }
 
-
-
-//    private String convertImageToBase64(MultipartFile file) {
-//        try {
-//            byte[] bytes = file.getBytes();
-//            return Base64.getEncoder().encodeToString(bytes);
-//        } catch (IOException e) {
-//            throw new RuntimeException("Failed to encode the image.", e);
-//        }
-//    }
-
-    public void newMessage(UserMessageRequest request) {
-
+    public void sendUserMessage(UserMessageRequest request) {
+        if (request.getFile() != null && !isBase64(request.getFile().getData())) {
+            throw new ChatException(ErrorCode.INVALID_FILE, "Invalid file to send");
+        }
         UserMessage message = modelMapper.map(request, UserMessage.class);
-
-//        System.out.println(request.getFile());
-//        if (request.getFile() != null) {
-        //String base64Image = convertImageToBase64(request.getFile());
-//            message.setFile(base64Image);
-//        }
-
         notification.newMessageNotification(message);
+        log.info("message sent from {} to {} : {}", request.getFrom(), request.getTo(), request.getMessage());
     }
 
     public void delete(String username) {
@@ -118,18 +101,33 @@ public class UserService {
         notification.serverNotification(serverMessageRequestBuilder(ServerEventType.isOnline, username));
         log.info("send the updated list to user: {}", username);
         notification.serverNotification(serverMessageRequestBuilder(ServerEventType.updatedUsersAndGroupsList, ServerManager.updatedLists()));
+        log.info("Send missed messages");
+        userObject.sendOfflineMessages();
         return userObject.getSseEmitter();
     }
 
     public void closeConnection(String username) {
+        log.info("trying to disconnect user {}", username);
         User userObject = getUserObject(username);
         userObject.setIsActive(false);
         userObject.closeConnection();
+        log.info("user {} disconnected", username);
     }
 
-    public void sendOfflineMessages(String username) {
-        getUserObject(username).sendOfflineMessages();
+    private boolean isBase64(String data) {
+        try {
+            // Decoding the data to verify if it's a valid Base64 string
+            Base64.getDecoder().decode(data);
+            // If decoding is successful, the string is a valid Base64-encoded string
+            return true;
+        } catch (IllegalArgumentException e) {
+            // IllegalArgumentException is thrown for invalid Base64
+            return false;
+        }
     }
+//    public void sendOfflineMessages(String username) {
+//        getUserObject(username).sendOfflineMessages();
+//    }
 
 //
 //    @Scheduled(fixedRate = 20000) // Send data every 20 seconds

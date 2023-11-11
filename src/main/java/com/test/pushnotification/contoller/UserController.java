@@ -2,7 +2,6 @@ package com.test.pushnotification.contoller;
 
 import com.test.pushnotification.events.UserEventTypes;
 import com.test.pushnotification.model.User;
-import com.test.pushnotification.request.UserLoginRequest;
 import com.test.pushnotification.request.UserSignupRequest;
 import com.test.pushnotification.request.message.UserMessageRequest;
 import com.test.pushnotification.response.Response;
@@ -44,16 +43,16 @@ public class UserController {
     @Operation(summary = "Keep connection alive")
     public ResponseEntity<String> keepAlive(@PathVariable("username") String username) {
         // Acknowledge the "ping" request
-        log.info("Connection kept alive for user: {}" , username);
-        return new ResponseEntity<>( HttpStatus.NO_CONTENT);
+        log.info("Connection kept alive for user: {}", username);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
-    @GetMapping(value = "/ready/{username}")
-    @Operation(summary = "Indicate client is ready to receive messages")
-    public ResponseEntity<Void> clientReady(@PathVariable("username") String username) {
-        userService.sendOfflineMessages(username);
-        return ResponseEntity.ok().build();
-    }
+//    @GetMapping(value = "/ready/{username}")
+//    @Operation(summary = "Indicate client is ready to receive messages")
+//    public ResponseEntity<Void> clientReady(@PathVariable("username") String username) {
+//        userService.sendOfflineMessages(username);
+//        return ResponseEntity.ok().build();
+//    }
 
     @GetMapping(value = "/disconnect/{username}")
     @Operation(summary = "Close a connection")
@@ -75,13 +74,9 @@ public class UserController {
 
     @PostMapping(value = "/message")
     @Operation(summary = "Send a message")
-    public ResponseEntity<String> createNewMessage(@RequestBody UserMessageRequest request) {
-        try {
-            userService.newMessage(request);
-            return ResponseEntity.ok("Message sent successfully.");
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
-        }
+    public ResponseEntity<String> createNewMessage(@Valid @RequestBody UserMessageRequest request) {
+        userService.sendUserMessage(request);
+        return ResponseEntity.ok("Message sent successfully.");
     }
 
     @DeleteMapping("/delete")

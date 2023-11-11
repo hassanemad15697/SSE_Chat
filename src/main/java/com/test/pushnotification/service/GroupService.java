@@ -18,9 +18,7 @@ import com.test.pushnotification.singleton.ServerManager;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
 import java.util.Base64;
 
 @Service
@@ -66,14 +64,12 @@ public class GroupService {
         return group.addMember(request.getAdminName(), request.getMemberName());
     }
 
-    public void sendMessage(GroupMessageRequest request, MultipartFile file) {
+    public void sendGroupMessage(GroupMessageRequest request) {
         isExistGroup(request.getGroupName());
-        GroupMessage message = modelMapper.map(request, GroupMessage.class);
-        try {
-            message.setFile(Base64.getEncoder().encodeToString(file.getBytes()));
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+        if (!isBase64(request.getFile().getData())) {
+            throw new ChatException(ErrorCode.INVALID_FILE, "Invalid file to send");
         }
+        GroupMessage message = modelMapper.map(request, GroupMessage.class);
         notification.groupNotification(message);
     }
 
@@ -137,5 +133,17 @@ public class GroupService {
         isExistGroup(groupName);
         Group group = ServerManager.getGroupByName(groupName);
         group.unsubscribeEvent(username, event);
+    }
+
+    private boolean isBase64(String data) {
+        try {
+            // Decoding the data to verify if it's a valid Base64 string
+            Base64.getDecoder().decode(data);
+            // If decoding is successful, the string is a valid Base64-encoded string
+            return true;
+        } catch (IllegalArgumentException e) {
+            // IllegalArgumentException is thrown for invalid Base64
+            return false;
+        }
     }
 }
