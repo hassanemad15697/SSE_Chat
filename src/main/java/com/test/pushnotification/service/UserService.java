@@ -15,7 +15,6 @@ import com.test.pushnotification.response.UserResponse;
 import com.test.pushnotification.singleton.ServerManager;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Base64;
@@ -26,11 +25,15 @@ import java.util.Collection;
 public class UserService {
 
     private static final Notification notification = new Notification();
-    @Autowired
-    private ModelMapper modelMapper;
+
+    private final ModelMapper modelMapper;
+
+    public UserService(ModelMapper modelMapper) {
+        this.modelMapper = modelMapper;
+    }
 
     public static void disconnected(String username) {
-        log.info("user diconnected: {}",username);
+        log.info("user disconnected: {}", username);
         getUserObject(username).setIsActive(false);
         notification.serverNotification(serverMessageRequestBuilder(ServerEventType.isOffline, username));
     }
@@ -125,6 +128,8 @@ public class UserService {
             return false;
         }
     }
+
+
 //    public void sendOfflineMessages(String username) {
 //        getUserObject(username).sendOfflineMessages();
 //    }
