@@ -38,20 +38,22 @@ public class UserController {
     @GetMapping(value = "/connect/{username}")
     @Operation(summary = "Establish a connection")
     public Object connectUser(@NotNull @PathVariable("username") String username, HttpSession session) {
-        session.setMaxInactiveInterval(12);
         session.setAttribute("username", username);
+        log.info(String.valueOf(session.getMaxInactiveInterval()));
         return userService.connect(username);
     }
 
     @GetMapping(value = "/keep-alive/{username}")
     @Operation(summary = "Keep connection alive")
-    public ResponseEntity<String> keepAlive(@NotNull @PathVariable("username") String username, HttpSession session) {
+    public Object keepAlive(@NotNull @PathVariable("username") String username) {
         // Acknowledge the "ping" request
         log.info("Connection kept alive for user: {}", username);
-//        log.info("Session id: {}", session.getId());
-//        log.info("Session username: {}", session.getAttribute("username"));
-        userService.keepAlive(username);
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        Object o = userService.keepAlive(username);
+        if (o == null) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        } else {
+            return o;
+        }
     }
 
 //    @GetMapping(value = "/ready/{username}")

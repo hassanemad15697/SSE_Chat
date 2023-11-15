@@ -17,6 +17,7 @@ public class SessionListener implements HttpSessionListener {
     @Override
     public void sessionCreated(HttpSessionEvent sessionEvent) {
         // This is called when a session is created
+        sessionEvent.getSession().setMaxInactiveInterval(10);
 //        log.info("Session for user:({}) created:{} " ,sessionEvent.getSession().getAttribute("username"), sessionEvent.getSession().getId());
 
     }

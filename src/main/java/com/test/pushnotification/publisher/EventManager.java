@@ -28,7 +28,16 @@ public class EventManager {
         if (eventMessage.getEventType() instanceof ServerEventType) {
             ServerMessage message = (ServerMessage) eventMessage;
             ServerEventType eventType = (ServerEventType) message.getEventType();
-            ServerManager.getAllSubscribersObjectsToEvent(eventType).forEach(user -> user.update(message));
+            if (message.getTo() == null) {
+                ServerManager.getAllSubscribersObjectsToEvent(eventType).forEach(user -> user.update(message));
+            } else {
+                Set<String> allUsernamesSubscribingAnEvent = ServerManager.getAllUsernamesSubscribingAnEvent(message.getEventType());
+                if (allUsernamesSubscribingAnEvent.contains(message.getTo())) {
+                    ServerManager.getUserByUsername(message.getTo()).update(message);
+                } else {
+                    throw new ChatException(ErrorCode.USER_NOT_ACCEPT_MESSAGES, "user " + message.getTo() + " doesn't accept any messages");
+                }
+            }
         } else if (eventMessage.getEventType() instanceof UserEventTypes) {
             UserMessage message = (UserMessage) eventMessage;
             Set<String> allUsernamesSubscribingAnEvent = ServerManager.getAllUsernamesSubscribingAnEvent(message.getEventType());

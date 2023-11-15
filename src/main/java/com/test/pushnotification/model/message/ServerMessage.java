@@ -1,18 +1,21 @@
 package com.test.pushnotification.model.message;
 
 import com.test.pushnotification.events.ServerEventType;
-import lombok.*;
-import lombok.experimental.SuperBuilder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.io.Serializable;
-import java.time.Instant;
 
 @Setter
 @Getter
 @NoArgsConstructor
 public class ServerMessage  extends Message implements Serializable {
 
-    public ServerMessage(ServerEventType eventType, String message) {
+    private String to;
+
+    public ServerMessage(ServerEventType eventType, String message, String to) {
         super(eventType, message);
+        this.to = to;
     }
 }

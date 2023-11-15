@@ -38,8 +38,8 @@ public class GroupService {
         return ServerManager.hasGroup(groupName);
     }
 
-    private static ServerMessage serverMessageRequestBuilder(ServerEventType eventTypes, String message) {
-        return new ServerMessage(eventTypes,message);
+    private static ServerMessage serverMessageRequestBuilder(ServerEventType eventTypes, String message, String to) {
+        return new ServerMessage(eventTypes, message, to);
     }
 
     public Response createNewGroup(GroupRequest request) {
@@ -49,7 +49,7 @@ public class GroupService {
         }
         //add the group to the list
         Group newGroup = new Group(request.getCreatedBy(), request.getGroupName());
-        notification.serverNotification(serverMessageRequestBuilder(ServerEventType.updatedUsersAndGroupsList, ServerManager.updatedLists()));
+        notification.serverNotification(serverMessageRequestBuilder(ServerEventType.updatedUsersAndGroupsList, ServerManager.updatedLists(), null));
         return modelMapper.map(newGroup, GroupResponse.class);
     }
 
@@ -107,7 +107,7 @@ public class GroupService {
         Group group = ServerManager.getGroupByName(groupName);
         assert group != null;
         Response response = group.deleteGroup(admin);
-        notification.serverNotification(serverMessageRequestBuilder(ServerEventType.updatedUsersAndGroupsList, ServerManager.updatedLists()));
+        notification.serverNotification(serverMessageRequestBuilder(ServerEventType.updatedUsersAndGroupsList, ServerManager.updatedLists(), null));
         return response;
     }
 

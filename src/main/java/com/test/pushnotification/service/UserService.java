@@ -37,11 +37,11 @@ public class UserService {
         User user = getUserObject(username);
         user.setIsActive(false);
         user.createNewSSE();
-        notification.serverNotification(serverMessageRequestBuilder(ServerEventType.isOffline, username));
+        notification.serverNotification(serverMessageRequestBuilder(ServerEventType.isOffline, username, null));
     }
 
-    private static ServerMessage serverMessageRequestBuilder(ServerEventType eventTypes, String message) {
-        return new ServerMessage(eventTypes,message);
+    private static ServerMessage serverMessageRequestBuilder(ServerEventType eventTypes, String message, String to) {
+        return new ServerMessage(eventTypes, message, to);
     }
 
     private static User getUserObject(String username) {
@@ -57,9 +57,9 @@ public class UserService {
         //add the user to the list
         User newUser = new User(request);
         log.info("User : {} added ", request.getUsername());
-        notification.serverNotification(serverMessageRequestBuilder(ServerEventType.newJoiner, request.getUsername()));
+        notification.serverNotification(serverMessageRequestBuilder(ServerEventType.newJoiner, request.getUsername(), null));
         log.info("Notify subscribers that a new user has been added");
-        notification.serverNotification(serverMessageRequestBuilder(ServerEventType.updatedUsersAndGroupsList, ServerManager.updatedLists()));
+        notification.serverNotification(serverMessageRequestBuilder(ServerEventType.updatedUsersAndGroupsList, ServerManager.updatedLists(), null));
         log.info("Notify subscribers with new updated list of users and groups");
         return newUser;
     }
@@ -75,8 +75,8 @@ public class UserService {
 
     public void delete(String username) {
         getUserObject(username).delete();
-        notification.serverNotification(serverMessageRequestBuilder(ServerEventType.userDeleted, username));
-        notification.serverNotification(serverMessageRequestBuilder(ServerEventType.updatedUsersAndGroupsList, ServerManager.updatedLists()));
+        notification.serverNotification(serverMessageRequestBuilder(ServerEventType.userDeleted, username, null));
+        notification.serverNotification(serverMessageRequestBuilder(ServerEventType.updatedUsersAndGroupsList, ServerManager.updatedLists(), null));
     }
 
     public void subscribe(String username, EventType event) {
@@ -103,14 +103,24 @@ public class UserService {
         log.info("trying to connect {}", username);
         User userObject = getUserObject(username);
         userObject.connect();
-        notification.serverNotification(serverMessageRequestBuilder(ServerEventType.isOnline, username));
+        notification.serverNotification(serverMessageRequestBuilder(ServerEventType.isOnline, username, null));
         log.info("send the updated list to user: {}", username);
-        notification.serverNotification(serverMessageRequestBuilder(ServerEventType.updatedUsersAndGroupsList, ServerManager.updatedLists()));
+        notification.serverNotification(serverMessageRequestBuilder(ServerEventType.updatedUsersAndGroupsList, ServerManager.updatedLists(), username));
         log.info("Send missed messages");
         userObject.sendOfflineMessages();
         return userObject.getSseEmitter();
     }
 
+
+    public Object keepAlive(String username) {
+        User user = getUserObject(username);
+        if (!user.getIsActive()) {
+            log.info("user ({}) restored the connection", username);
+            return connect(username);
+        }
+        user.update(serverMessageRequestBuilder(ServerEventType.ping, "KeepAlive", username));
+        return null;
+    }
     public void closeConnection(String username) {
         log.info("trying to disconnect user {}", username);
         User userObject = getUserObject(username);
@@ -131,33 +141,10 @@ public class UserService {
         }
     }
 
-    public void keepAlive(String username) {
-        getUserObject(username).update(serverMessageRequestBuilder(ServerEventType.ping, "KeepAlive"));
-    }
-
 
 //    public void sendOfflineMessages(String username) {
 //        getUserObject(username).sendOfflineMessages();
 //    }
 
-//
-//    @Scheduled(fixedRate = 20000) // Send data every 20 seconds
-//    public void sendPing() {
-//        ServerManager.getAllUsersObjects().forEach(user -> {
-//            if (user.getSseEmitter() != null) {
-//                try {
-//                    if (user.getIsActive()) {
-//                        user.update(serverMessageRequestBuilder(ServerEventType.ping, "KeepAlive"));
-//                        log.info("PING from server to user: {}", user.getUsername());
-//                    }
-//                } catch (Exception e) {
-//                    // Handle exceptions or client disconnects
-//                    log.info("cannot reach user: {} too kep the connection alive", user.getUsername());
-//                    user.closeConnection();
-//                }
-//            }
-//        });
-//
-//    }
 
 }
