@@ -14,7 +14,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 import java.util.Collection;
 
 @RestController
@@ -35,15 +37,19 @@ public class UserController {
 
     @GetMapping(value = "/connect/{username}")
     @Operation(summary = "Establish a connection")
-    public Object connectUser(@PathVariable("username") String username) {
+    public Object connectUser(@NotNull @PathVariable("username") String username, HttpSession session) {
+        session.setMaxInactiveInterval(12);
+        session.setAttribute("username", username);
         return userService.connect(username);
     }
 
     @GetMapping(value = "/keep-alive/{username}")
     @Operation(summary = "Keep connection alive")
-    public ResponseEntity<String> keepAlive(@PathVariable("username") String username) {
+    public ResponseEntity<String> keepAlive(@NotNull @PathVariable("username") String username, HttpSession session) {
         // Acknowledge the "ping" request
         log.info("Connection kept alive for user: {}", username);
+//        log.info("Session id: {}", session.getId());
+//        log.info("Session username: {}", session.getAttribute("username"));
         userService.keepAlive(username);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
@@ -57,7 +63,7 @@ public class UserController {
 
     @GetMapping(value = "/disconnect/{username}")
     @Operation(summary = "Close a connection")
-    public void closeUserConnection(@PathVariable("username") String username) {
+    public void closeUserConnection(@NotNull @PathVariable("username") String username) {
         userService.closeConnection(username);
     }
 
@@ -82,28 +88,28 @@ public class UserController {
 
     @DeleteMapping("/delete")
     @Operation(summary = "Delete a user and close the connection")
-    public ResponseEntity<Integer> deleteUser(@RequestParam("username") String username) {
+    public ResponseEntity<Integer> deleteUser(@NotNull @RequestParam("username") String username) {
         userService.delete(username);
         return ResponseEntity.ok(200);
     }
 
     @PostMapping("/subscribe")
     @Operation(summary = "Subscribe an event")
-    public ResponseEntity<Integer> subscribeUser(@RequestParam("username") String username, @RequestParam("event") UserEventTypes event) {
+    public ResponseEntity<Integer> subscribeUser(@NotNull @RequestParam("username") String username, @RequestParam("event") UserEventTypes event) {
         userService.subscribe(username, event);
         return ResponseEntity.ok(200);
     }
 
     @PostMapping("/unsubscribe")
     @Operation(summary = "Unsubscribe an event")
-    public ResponseEntity<Integer> unsubscribeUser(@RequestParam("username") String username, @RequestParam("event") UserEventTypes event) {
+    public ResponseEntity<Integer> unsubscribeUser(@NotNull @RequestParam("username") String username, @RequestParam("event") UserEventTypes event) {
         userService.unsubscribe(username, event);
         return ResponseEntity.ok(200);
     }
 
     @PostMapping("/unsubscribe/all")
     @Operation(summary = "Unsubscribe an event")
-    public ResponseEntity<Integer> unsubscribeUserFromAllEvents(@RequestParam("username") String username) {
+    public ResponseEntity<Integer> unsubscribeUserFromAllEvents(@NotNull @RequestParam("username") String username) {
         userService.unsubscribeFromAllEvents(username);
         return ResponseEntity.ok(200);
     }

@@ -40,6 +40,7 @@ public class User implements EventListener {
     private UserMetaData userMetaData;
     // SSE Emitter object to establish the connection between the client and the sever
     private SseEmitter sseEmitter;
+
     public User(UserSignupRequest request) {
         // Generate a random UUID
         this.id = UUID.randomUUID();

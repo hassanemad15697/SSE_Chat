@@ -64,12 +64,11 @@ public class DefaultUsers {
         userService.addUser(shams);
         userService.addUser(bahaa);
 
-        GroupRequest group = GroupRequest.builder().groupName("SSE Group").createdBy("hassan").build();
+        GroupRequest group = GroupRequest.builder().groupName("SSE Team").createdBy("hassan").build();
         groupService.createNewGroup(group);
 
-        GroupMemberRequest groupMemberRequest = GroupMemberRequest.builder().groupName("SSE Group").adminName("hassan").memberName("amro").build();
+        GroupMemberRequest groupMemberRequest = GroupMemberRequest.builder().groupName("SSE Team").adminName("hassan").memberName("amro").build();
         groupService.addMember(groupMemberRequest);
-
-
     }
+
 }
