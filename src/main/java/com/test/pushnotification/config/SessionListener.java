@@ -2,13 +2,11 @@ package com.test.pushnotification.config;
 
 import com.test.pushnotification.singleton.ServerManager;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.stereotype.Component;
 
 import javax.servlet.http.HttpSessionEvent;
 import javax.servlet.http.HttpSessionListener;
 
-@EnableScheduling
 @Component
 @Slf4j
 public class SessionListener implements HttpSessionListener {
@@ -18,8 +16,6 @@ public class SessionListener implements HttpSessionListener {
     public void sessionCreated(HttpSessionEvent sessionEvent) {
         // This is called when a session is created
         sessionEvent.getSession().setMaxInactiveInterval(10);
-//        log.info("Session for user:({}) created:{} " ,sessionEvent.getSession().getAttribute("username"), sessionEvent.getSession().getId());
-
     }
 
     @Override
