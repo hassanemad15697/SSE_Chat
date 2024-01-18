@@ -84,4 +84,12 @@
 		</plugins>
 	</build>
 
+	<distributionManagement>
+		<repository>
+			<id>github</id>
+			<name>GitHub Packages</name>
+			<url>https://maven.pkg.github.com/hassanemad15697/SSE_Chat</url>
+		</repository>
+	</distributionManagement>
+
 </project>
