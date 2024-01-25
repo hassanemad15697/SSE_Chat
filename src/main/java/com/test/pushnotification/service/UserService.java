@@ -8,11 +8,13 @@ import com.test.pushnotification.exception.ErrorCode;
 import com.test.pushnotification.model.User;
 import com.test.pushnotification.model.message.ServerMessage;
 import com.test.pushnotification.model.message.UserMessage;
+import com.test.pushnotification.repository.UserRepository;
 import com.test.pushnotification.request.UserSignupRequest;
 import com.test.pushnotification.request.message.UserMessageRequest;
 import com.test.pushnotification.response.Response;
 import com.test.pushnotification.response.UserResponse;
 import com.test.pushnotification.singleton.ServerManager;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
@@ -22,15 +24,14 @@ import java.util.Collection;
 
 @Service
 @Slf4j
+@AllArgsConstructor
 public class UserService {
 
     private static final Notification notification = new Notification();
 
     private final ModelMapper modelMapper;
+    private final UserRepository userRepository;
 
-    public UserService(ModelMapper modelMapper) {
-        this.modelMapper = modelMapper;
-    }
 
     public static void disconnected(String username) {
         log.info("user disconnected: {}", username);
@@ -46,6 +47,12 @@ public class UserService {
 
     private static User getUserObject(String username) {
         return ServerManager.getUserByUsername(username);
+    }
+
+    public UserResponse createUser(UserSignupRequest request) {
+        com.test.pushnotification.model.new_models.User user = modelMapper.map(request, com.test.pushnotification.model.new_models.User.class);
+        com.test.pushnotification.model.new_models.User savedUser = userRepository.save(user);
+        return modelMapper.map(savedUser, UserResponse.class);
     }
 
     public User addUser( UserSignupRequest request) {

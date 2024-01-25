@@ -5,6 +5,7 @@ import com.test.pushnotification.model.User;
 import com.test.pushnotification.request.UserSignupRequest;
 import com.test.pushnotification.request.message.UserMessageRequest;
 import com.test.pushnotification.response.Response;
+import com.test.pushnotification.response.UserResponse;
 import com.test.pushnotification.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -29,9 +30,9 @@ public class UserController {
     private UserService userService;
 
     @Operation(summary = "Create new user")
-    @PostMapping(value = "/add")
-    public User createNewUser(@Valid @RequestBody UserSignupRequest request) {
-        return userService.addUser(request);
+    @PostMapping(value = "/create")
+    public ResponseEntity<UserResponse> createNewUser(@Valid @RequestBody UserSignupRequest request) {
+        return new ResponseEntity<>(userService.createUser(request), HttpStatus.CREATED);
     }
 
 

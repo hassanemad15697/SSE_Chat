@@ -14,10 +14,11 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 public class UserResponse implements Response {
-    private UUID id;
+    private UUID userId;
     private String username;
     private Boolean isActive;
     private String email;
+    private String fullName;
     private Gender gender;
     private Date dateOfBirth;
     private UserMetaData userMetaData;

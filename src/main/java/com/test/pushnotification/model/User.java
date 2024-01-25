@@ -14,7 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.io.IOException;
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.UUID;
@@ -33,7 +33,7 @@ public class User implements EventListener {
     private Set<Message> messages;
     private String email;
     private Gender gender;
-    private Date dateOfBirth;
+    private LocalDate dateOfBirth;
     private String profilePicture;
     private String password;
     // save all the messages that this user has received
@@ -50,7 +50,7 @@ public class User implements EventListener {
         userMetaData = new UserMetaData(request.getUsername());
         messages = new LinkedHashSet<>();
         email=request.getEmail();
-        password=request.getPassword();
+        password = request.getPasswordHash();
         profilePicture=request.getProfilePicture();
         gender=request.getGender();
         dateOfBirth=request.getDateOfBirth();

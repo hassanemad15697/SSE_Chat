@@ -7,7 +7,7 @@ import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Past;
 import javax.validation.constraints.Size;
-import java.util.Date;
+import java.time.LocalDate;
 
 @Data
 @Setter
@@ -25,11 +25,17 @@ public class UserSignupRequest {
     private String email;
 
     @NotBlank
+    @Size(min = 3, max = 50)
+    private String fullName;
+
+    @NotBlank
     @Size(min = 6, max = 50)
-    private String password;
+    private String passwordHash;
 
     private String profilePicture;
+
     private Gender gender;
+
     @Past
-    private Date dateOfBirth;
+    private LocalDate dateOfBirth;
 }

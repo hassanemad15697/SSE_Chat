@@ -9,8 +9,7 @@ import com.test.pushnotification.service.UserService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
-import java.time.Instant;
-import java.util.Date;
+import java.time.LocalDate;
 
 @Component
 public class DefaultUsers {
@@ -29,33 +28,33 @@ public class DefaultUsers {
         UserSignupRequest hassan = UserSignupRequest.builder()
                 .username("hassan")
                 .gender(Gender.male)
-                .dateOfBirth(Date.from(Instant.now()))
+                .dateOfBirth(LocalDate.now())
                 .email("hassanaskar5@gmail.com")
-                .password("password123")
+                .passwordHash("password123")
                 .profilePicture("")
                 .build();
         UserSignupRequest amro = UserSignupRequest.builder()
                 .username("amro")
                 .gender(Gender.male)
-                .dateOfBirth(Date.from(Instant.now()))
+                .dateOfBirth(LocalDate.now())
                 .email("amroaskar5@gmail.com")
-                .password("password123")
+                .passwordHash("password123")
                 .profilePicture("")
                 .build();
                 UserSignupRequest shams = UserSignupRequest.builder()
                 .username("shams")
                 .gender(Gender.male)
-                .dateOfBirth(Date.from(Instant.now()))
+                        .dateOfBirth(LocalDate.now())
                 .email("ahmedshams5@gmail.com")
-                .password("password123")
+                        .passwordHash("password123")
                 .profilePicture("")
                 .build();
                 UserSignupRequest bahaa = UserSignupRequest.builder()
                 .username("bahaa")
                 .gender(Gender.male)
-                .dateOfBirth(Date.from(Instant.now()))
+                        .dateOfBirth(LocalDate.now())
                 .email("bahaazenhom5@gmail.com")
-                .password("password123")
+                        .passwordHash("password123")
                 .profilePicture("")
                 .build();
 
